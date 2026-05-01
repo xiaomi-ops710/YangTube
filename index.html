@@ -3,99 +3,145 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>YangTube</title>
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icon.png">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>YangTube Pro</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
-        body { margin: 0; font-family: 'Roboto', sans-serif; background-color: #fefefe; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-        header { background: #fff; padding: 12px 16px; display: flex; align-items: center; z-index: 100; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
-        .search-bar { background: #f3f3f3; border-radius: 28px; display: flex; flex: 1; padding: 8px 16px; align-items: center; }
-        .search-bar input { border: none; background: transparent; flex: 1; font-size: 16px; outline: none; padding-left: 8px; }
-        #player-container { display: none; width: 100%; background: #000; aspect-ratio: 16/9; }
+        body { margin: 0; font-family: 'Roboto', sans-serif; background-color: #f9f9f9; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        
+        /* ヘッダー周り */
+        header { background: #fff; padding: 10px 16px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); z-index: 100; }
+        .search-row { display: flex; align-items: center; gap: 8px; }
+        .search-bar { background: #f1f1f1; border-radius: 24px; display: flex; flex: 1; padding: 6px 14px; align-items: center; }
+        .search-bar input { border: none; background: transparent; flex: 1; font-size: 16px; outline: none; }
+        
+        /* 切り替えタブ */
+        .tabs { display: flex; gap: 10px; padding-left: 4px; }
+        .tab { font-size: 13px; padding: 6px 12px; border-radius: 16px; background: #eee; cursor: pointer; border: none; }
+        .tab.active { background: #000; color: #fff; }
+
+        /* プレイヤー：隠れないように調整 */
+        #player-container { display: none; width: 100%; background: #000; padding: 10px 0; box-sizing: border-box; }
+        .video-wrapper { position: relative; width: 100%; aspect-ratio: 16/9; max-width: 800px; margin: 0 auto; }
         iframe { width: 100%; height: 100%; border: none; }
-        main { padding: 16px; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; overflow-y: auto; flex: 1; }
-        .video-card { background: #fff; border-radius: 12px; overflow: hidden; cursor: pointer; }
-        .thumbnail { width: 100%; aspect-ratio: 16/9; background-size: cover; background-position: center; border-radius: 12px; }
-        .video-info { padding: 10px 4px; }
-        .video-info h3 { margin: 0; font-size: 14px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .video-info p { margin: 4px 0 0; font-size: 12px; color: #606060; }
+
+        /* リスト表示 */
+        main { padding: 16px; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; overflow-y: auto; flex: 1; }
+        .card { background: #fff; border-radius: 8px; overflow: hidden; cursor: pointer; transition: 0.2s; }
+        .thumbnail { width: 100%; aspect-ratio: 16/9; background-size: cover; background-position: center; }
+        .channel-thumb { aspect-ratio: 1/1; width: 80px; border-radius: 50%; margin: 10px auto; }
+        .info { padding: 10px; }
+        .info h3 { margin: 0; font-size: 14px; line-height: 1.4; height: 2.8em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+        .info p { margin: 4px 0 0; font-size: 12px; color: #606060; }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="search-bar">
-            <span class="material-icons" onclick="closePlayer()" id="back-btn" style="display:none; margin-right:8px; cursor:pointer;">arrow_back</span>
-            <span class="material-icons">search</span>
-            <input type="text" placeholder="YangTubeで検索">
+        <div class="search-row">
+            <span class="material-icons" onclick="closePlayer()" id="back-btn" style="display:none; cursor:pointer;">arrow_back</span>
+            <div class="search-bar">
+                <span class="material-icons" style="font-size: 20px; color: #666;">search</span>
+                <input type="text" id="query" placeholder="YangTubeで検索">
+            </div>
+        </div>
+        <div class="tabs">
+            <button class="tab active" onclick="setMode('video', this)">動画</button>
+            <button class="tab" onclick="setMode('channel', this)">チャンネル</button>
         </div>
     </header>
 
-    <div id="player-container"></div>
+    <div id="player-container">
+        <div class="video-wrapper"></div>
+    </div>
 
-    <main id="video-list">
-        <p style="text-align:center; color:#888;">検索窓にキーワードを入れて動画を探してね</p>
+    <main id="result-list">
+        <p style="text-align:center; color:#888; margin-top:40px;">キーワードを入れて探してみよう</p>
     </main>
 
     <script>
-        // 
+        // ★ここにあなたのAPIキーを貼り付けてください★
         const API_KEY = 'AIzaSyCsAe_J968Z05UXBbqHHhI7iVSZMnjyTdo'; 
 
-        const searchInput = document.querySelector('.search-bar input');
-        const videoList = document.getElementById('video-list');
-        const playerContainer = document.getElementById('player-container');
+        let currentMode = 'video'; 
+        const input = document.getElementById('query');
+        const list = document.getElementById('result-list');
+        const playerBox = document.getElementById('player-container');
         const backBtn = document.getElementById('back-btn');
 
-        searchInput.addEventListener('keypress', (e) => {
+        function setMode(mode, btn) {
+            currentMode = mode;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            btn.classList.add('active');
+            input.placeholder = mode === 'video' ? "動画を検索" : "チャンネルを検索";
+        }
+
+        input.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
-                searchVideos(searchInput.value);
-                closePlayer();
-                searchInput.blur();
+                search(input.value);
+                input.blur();
             }
         });
 
-        async function searchVideos(query) {
-            const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&key=${API_KEY}&type=video&maxResults=12`;
+        async function search(q) {
+            if(!q) return;
+            const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(q)}&key=${API_KEY}&type=${currentMode}&maxResults=15`;
+            
             try {
                 const res = await fetch(url);
                 const data = await res.json();
-                if (data.items) {
-                    renderVideos(data.items);
-                } else {
-                    alert('動画が見つかりませんでした。APIキーを確認してください。');
-                }
-            } catch (err) { alert('通信エラーが発生しました'); }
+                render(data.items);
+                closePlayer();
+            } catch (err) { alert('エラーが発生しました'); }
         }
 
-        function renderVideos(videos) {
-            videoList.innerHTML = '';
-            videos.forEach(v => {
+        function render(items) {
+            list.innerHTML = '';
+            if(!items || items.length === 0) {
+                list.innerHTML = '<p style="text-align:center;">見つかりませんでした</p>';
+                return;
+            }
+
+            items.forEach(item => {
+                const isVideo = item.id.kind === 'youtube#video';
+                const id = isVideo ? item.id.videoId : item.id.channelId;
                 const div = document.createElement('div');
-                div.className = 'video-card';
-                div.onclick = () => playVideo(v.id.videoId);
-                div.innerHTML = `
-                    <div class="thumbnail" style="background-image:url('${v.snippet.thumbnails.high.url}')"></div>
-                    <div class="video-info">
-                        <h3>${v.snippet.title}</h3>
-                        <p>${v.snippet.channelTitle}</p>
-                    </div>
-                `;
-                videoList.appendChild(div);
+                div.className = 'card';
+                
+                // チャンネルと動画で見た目を変える
+                if (isVideo) {
+                    div.onclick = () => playVideo(id);
+                    div.innerHTML = `
+                        <div class="thumbnail" style="background-image:url('${item.snippet.thumbnails.high.url}')"></div>
+                        <div class="info">
+                            <h3>${item.snippet.title}</h3>
+                            <p>${item.snippet.channelTitle}</p>
+                        </div>
+                    `;
+                } else {
+                    div.onclick = () => window.open(`https://www.youtube.com/channel/${id}`, '_blank');
+                    div.innerHTML = `
+                        <div class="thumbnail channel-thumb" style="background-image:url('${item.snippet.thumbnails.high.url}')"></div>
+                        <div class="info" style="text-align:center;">
+                            <h3>${item.snippet.title}</h3>
+                            <p>チャンネル</p>
+                        </div>
+                    `;
+                }
+                list.appendChild(div);
             });
         }
 
         function playVideo(id) {
-            playerContainer.style.display = 'block';
-            playerContainer.innerHTML = `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+            playerBox.style.display = 'block';
+            playerBox.querySelector('.video-wrapper').innerHTML = 
+                `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1&rel=0&modestbranding=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
             backBtn.style.display = 'block';
             window.scrollTo(0, 0);
         }
 
         function closePlayer() {
-            playerContainer.style.display = 'none';
-            playerContainer.innerHTML = '';
+            playerBox.style.display = 'none';
+            playerBox.querySelector('.video-wrapper').innerHTML = '';
             backBtn.style.display = 'none';
         }
     </script>
