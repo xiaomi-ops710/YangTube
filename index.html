@@ -4,298 +4,226 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>YangTube</title>
-    <!-- Google Material Symbols Rounded -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" />
     <style>
         :root {
             --m3-surface: #1c1b1f;
-            --m3-on-surface: #e6e1e5;
             --m3-primary: #d0bcff;
-            --m3-secondary-container: #4a4458;
-            --m3-on-secondary-container: #e8def8;
+            --accent-color: #d0bcff;
+            --bg-color: #000000;
         }
 
         body {
-            margin: 0;
-            padding: 0;
-            background-color: black;
-            color: white;
-            font-family: 'Roboto', sans-serif;
-            overflow: hidden;
+            margin: 0; background-color: var(--bg-color); color: white;
+            font-family: 'Roboto', sans-serif; overflow: hidden;
         }
 
-        /* ヘッダー */
+        /* 起動アニメーション */
+        #splash-screen {
+            position: fixed; inset: 0; background: black; z-index: 1000;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .splash-line {
+            width: 2px; height: 0; background: white;
+            animation: line-grow 1.5s ease-in-out forwards;
+        }
+        @keyframes line-grow {
+            0% { height: 0; }
+            50% { height: 100px; }
+            100% { height: 0; opacity: 0; }
+        }
+
+        /* ヘッダー修正 (検索ボタンのはみ出し防止) */
         .header {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            height: 56px;
-            background: rgba(0,0,0,0.9);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 16px;
-            z-index: 100;
+            position: fixed; top: 0; width: 100%; height: 56px;
+            background: rgba(0,0,0,0.9); display: flex;
+            align-items: center; justify-content: space-between;
+            padding: 0 16px; z-index: 100; box-sizing: border-box;
+        }
+        .search-container {
+            display: flex; flex: 1; margin: 0 15px; background: #222;
+            border-radius: 20px; padding: 4px 12px; align-items: center;
+        }
+        .search-container input {
+            background: none; border: none; color: white; flex: 1; outline: none;
         }
 
-        .logo { font-size: 20px; font-weight: bold; color: white; display: flex; align-items: center; gap: 4px; }
-        .logo span { color: #FF0000; font-size: 30px; }
-
-        /* カテゴリバー */
+        /* カテゴリバー (クリック可能に修正) */
         .category-bar {
-            position: fixed;
-            top: 56px;
-            width: 100%;
-            overflow-x: auto;
-            white-space: nowrap;
-            background: black;
-            padding: 8px 0;
-            z-index: 99;
-            display: flex;
-            gap: 8px;
-            padding-left: 12px;
+            position: fixed; top: 56px; width: 100%; overflow-x: auto;
+            background: black; padding: 8px 12px; z-index: 99; display: flex; gap: 8px;
         }
-        .category-bar::-webkit-scrollbar { display: none; }
         .category-item {
-            background: var(--m3-secondary-container);
-            color: var(--m3-on-secondary-container);
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-size: 14px;
-            border: none;
+            background: #333; color: white; padding: 6px 16px;
+            border-radius: 8px; border: none; cursor: pointer; transition: 0.3s;
         }
         .category-item.active { background: white; color: black; }
 
-        /* メインコンテンツエリア */
+        /* グリッドレイアウト (タブレット向け3列) */
         .content-area {
-            margin-top: 110px;
-            height: calc(100vh - 180px);
-            overflow-y: auto;
-            padding: 0 12px;
+            margin-top: 110px; height: calc(100vh - 190px);
+            overflow-y: auto; padding: 12px;
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
         }
-
-        /* ショート画面 (スナップスクロール) */
-        #shorts-page {
-            display: none;
-            height: 100vh;
-            overflow-y: scroll;
-            scroll-snap-type: y mandatory;
-        }
-        .short-video {
-            height: 100vh;
-            width: 100%;
-            scroll-snap-align: start;
-            background: #111;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* 下部タブバー */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            height: 80px;
-            background: var(--m3-surface);
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            border-top: 0.5px solid #333;
-            padding-bottom: 10px;
-        }
-        .nav-item {
-            text-align: center;
-            color: #aaa;
-            font-size: 10px;
-            flex: 1;
-            cursor: pointer;
-        }
-        .nav-item.active { color: white; }
-        .nav-item .material-symbols-rounded { font-size: 28px; margin-bottom: 4px; }
-        .create-btn .material-symbols-rounded { font-size: 45px; color: white; }
 
         /* 動画カード */
-        .video-card { margin-bottom: 20px; }
-        .thumbnail { width: 100%; border-radius: 12px; aspect-ratio: 16/9; background: #333; object-fit: cover; }
-        .video-info { display: flex; gap: 12px; margin-top: 10px; }
-        .channel-icon { width: 36px; height: 36px; border-radius: 50%; background: #444; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-        .video-text h3 { margin: 0; font-size: 14px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .video-text p { margin: 4px 0 0; font-size: 12px; color: #aaa; }
+        .video-card { cursor: pointer; transition: transform 0.2s; }
+        .video-card:active { transform: scale(0.98); }
+        .thumbnail { width: 100%; aspect-ratio: 16/9; border-radius: 12px; object-fit: cover; }
+        .video-info { display: flex; gap: 10px; margin-top: 8px; }
+        .ch-click-area { cursor: pointer; display: flex; align-items: center; gap: 10px; }
+        .channel-icon { width: 36px; height: 36px; border-radius: 50%; background: #444; }
 
-        /* 独自UIチャンネルオーバーレイ */
-        #channel-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: black; z-index: 200; display: none;
-            overflow-y: auto;
+        /* 下部タブバー (新構成) */
+        .bottom-nav {
+            position: fixed; bottom: 0; width: 100%; height: 80px;
+            background: var(--m3-surface); display: flex; z-index: 100;
         }
+        .nav-item {
+            flex: 1; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; color: #aaa;
+        }
+        .nav-item.active { color: var(--accent-color); }
+        .nav-item .material-symbols-rounded { font-size: 28px; transition: 0.3s; }
+        .nav-item:active .material-symbols-rounded { transform: scale(1.2); }
 
-        /* 広告ぼかし用 */
-        .ad-overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            backdrop-filter: blur(30px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 50;
+        /* プレイヤーオーバーレイ */
+        #player-overlay {
+            position: fixed; inset: 0; background: black; z-index: 500; display: none;
         }
+        
+        /* 設定パネル */
+        #settings-panel {
+            padding: 20px; display: none;
+        }
+        .setting-row { display: flex; justify-content: space-between; margin-bottom: 20px; }
     </style>
 </head>
 <body>
 
+    <div id="splash-screen"><div class="splash-line"></div></div>
+
     <header class="header">
-        <div class="logo"><span class="material-symbols-rounded">play_circle</span> YangTube</div>
-        <div class="header-icons">
-            <span class="material-symbols-rounded">search</span>
+        <div class="logo">YangTube</div>
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="検索...">
+            <span class="material-symbols-rounded" onclick="searchVideos()">search</span>
         </div>
     </header>
 
     <div class="category-bar" id="categoryBar">
-        <button class="category-item active">すべて</button>
-        <button class="category-item">音楽</button>
-        <button class="category-item">ゲーム</button>
-        <button class="category-item">ニュース</button>
-        <button class="category-item">ミックス</button>
-        <button class="category-item">ライブ</button>
-        <button class="category-item">最近アップロードされた動画</button>
+        <button class="category-item active" onclick="filterCategory('すべて', this)">すべて</button>
+        <button class="category-item" onclick="filterCategory('ゲーム', this)">ゲーム</button>
+        <button class="category-item" onclick="filterCategory('音楽', this)">音楽</button>
+        <button class="category-item" onclick="filterCategory('Minecraft', this)">Minecraft</button>
     </div>
 
-    <!-- ホーム画面 -->
-    <main class="content-area" id="home-page">
-        <div id="video-grid"></div>
-    </main>
-
-    <!-- ショート画面 -->
-    <main id="shorts-page"></main>
-
-    <!-- マイページ/設定画面 -->
-    <main class="content-area" id="mypage-page" style="display:none;">
-        <h2>マイページ</h2>
-        <div class="category-item" style="display:inline-block; margin-bottom:20px;">設定 (ダークモード・アクセントカラー)</div>
-        <p>視聴履歴: 15時間</p>
-    </main>
-
-    <!-- チャンネルUIオーバーレイ -->
-    <div id="channel-overlay">
-        <div style="padding: 16px;">
-            <span class="material-symbols-rounded" onclick="closeChannel()">arrow_back</span>
-            <div id="channel-content"></div>
+    <main class="content-area" id="home-page"></main>
+    <main class="content-area" id="search-page" style="display:none;"></main>
+    <main id="shorts-page" style="display:none; overflow-y: scroll; scroll-snap-type: y mandatory; height: 100vh;"></main>
+    <main class="content-area" id="subs-page" style="display:none;">
+        <div id="settings-icon" style="position:fixed; top:15px; right:15px; z-index:1000; cursor:pointer;">
+            <span class="material-symbols-rounded" onclick="toggleSettings()">settings</span>
         </div>
+        <div id="subs-content">登録したチャンネルがここに表示されます</div>
+        <div id="settings-panel">
+            <h3>設定</h3>
+            <div class="setting-row">ダークモード <input type="checkbox" checked disabled></div>
+            <div class="setting-row">アクセントカラー <input type="color" id="accentPicker" onchange="changeAccent(this.value)"></div>
+        </div>
+    </main>
+
+    <div id="player-overlay">
+        <span class="material-symbols-rounded" style="margin:10px; cursor:pointer;" onclick="closePlayer()">close</span>
+        <div id="player-container"></div>
     </div>
 
     <nav class="bottom-nav">
-        <div class="nav-item active" onclick="switchTab('home')">
-            <span class="material-symbols-rounded">home</span>
-            <p>ホーム</p>
-        </div>
-        <div class="nav-item" onclick="switchTab('shorts')">
-            <span class="material-symbols-rounded">play_arrow</span>
-            <p>ショート</p>
-        </div>
-        <div class="nav-item create-btn" onclick="triggerUpload()">
-            <span class="material-symbols-rounded">add_circle</span>
-        </div>
-        <div class="nav-item" onclick="switchTab('subscriptions')">
-            <span class="material-symbols-rounded">subscriptions</span>
-            <p>登録チャンネル</p>
-        </div>
-        <div class="nav-item" onclick="switchTab('mypage')">
-            <span class="material-symbols-rounded">person</span>
-            <p>マイページ</p>
-        </div>
+        <div class="nav-item active" onclick="switchTab('home')"><span class="material-symbols-rounded">home</span><p>ホーム</p></div>
+        <div class="nav-item" onclick="switchTab('search')"><span class="material-symbols-rounded">search</span><p>検索</p></div>
+        <div class="nav-item create-btn" onclick="triggerUpload()"><span class="material-symbols-rounded">add_circle</span></div>
+        <div class="nav-item" onclick="switchTab('shorts')"><span class="material-symbols-rounded">play_arrow</span><p>ショート</p></div>
+        <div class="nav-item" onclick="switchTab('subs')"><span class="material-symbols-rounded">subscriptions</span><p>登録</p></div>
     </nav>
 
-    <input type="file" id="videoUploader" style="display:none" accept="video/*">
-
     <script>
-        const API_KEY = 'AIzaSyCsAe_J968Z05UXBbqHHhI7iVSZMnjyTdo'; // ここに取得したAPIキーを入れてね！
+        const API_KEY = 'AIzaSyCsAe_J968Z05UXBbqHHhI7iVSZMnjyTdo';
 
-        // タブ切り替えロジック
-        function switchTab(tabId) {
-            document.querySelectorAll('main').forEach(m => m.style.display = 'none');
-            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-            
-            if(tabId === 'home') {
-                document.getElementById('home-page').style.display = 'block';
-                document.getElementById('categoryBar').style.display = 'flex';
-            } else if(tabId === 'shorts') {
-                document.getElementById('shorts-page').style.display = 'block';
-                document.getElementById('categoryBar').style.display = 'none';
-                loadShorts();
-            } else {
-                document.getElementById(tabId + '-page').style.display = 'block';
-            }
-            event.currentTarget.classList.add('active');
-        }
-
-        // 動画読み込み (レコメンド増量版)
-        async function loadVideos() {
-            const res = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&chart=mostPopular&maxResults=50&regionCode=JP&key=${API_KEY}`);
-            const data = await res.json();
-            const grid = document.getElementById('video-grid');
-            grid.innerHTML = data.items.map(item => `
-                <div class="video-card" onclick="openInternalChannel('${item.snippet.channelId}')">
-                    <img class="thumbnail" src="${item.snippet.thumbnails.medium.url}">
-                    <div class="video-info">
-                        <div class="channel-icon">${item.snippet.channelTitle[0]}</div>
-                        <div class="video-text">
-                            <h3>${item.snippet.title}</h3>
-                            <p>${item.snippet.channelTitle} ・ ${parseInt(item.statistics.viewCount).toLocaleString()}回視聴</p>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // ショート動画読み込み (縦スワイプUI)
-        async function loadShorts() {
-            const res = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoDuration=short&maxResults=10&key=${API_KEY}`);
-            const data = await res.json();
-            const shortsPage = document.getElementById('shorts-page');
-            shortsPage.innerHTML = data.items.map(item => `
-                <div class="short-video">
-                    <iframe width="100%" height="90%" src="https://www.youtube.com/embed/${item.id.videoId}?autoplay=1&controls=0&loop=1" frameborder="0"></iframe>
-                </div>
-            `).join('');
-        }
-
-        // ローカル動画アップロード再生
-        function triggerUpload() {
-            document.getElementById('videoUploader').click();
-        }
-
-        document.getElementById('videoUploader').onchange = e => {
-            const file = e.target.files[0];
-            const url = URL.createObjectURL(file);
-            const grid = document.getElementById('video-grid');
-            grid.innerHTML = `<h3>アップロードした動画を再生中: ${file.name}</h3><video src="${url}" controls width="100%" autoplay></video><hr>` + grid.innerHTML;
-            switchTab('home');
+        window.onload = () => {
+            setTimeout(() => { document.getElementById('splash-screen').style.display = 'none'; }, 2000);
+            loadVideos();
         };
 
-        // 独自チャンネルUI表示
-        async function openInternalChannel(channelId) {
-            document.getElementById('channel-overlay').style.display = 'block';
-            const res = await fetch(`https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&id=${channelId}&key=${API_KEY}`);
+        function switchTab(id) {
+            document.querySelectorAll('main').forEach(m => m.style.display = 'none');
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            document.getElementById(id + '-page').style.display = (id === 'shorts') ? 'block' : 'grid';
+            event.currentTarget.classList.add('active');
+            if(id === 'shorts') loadShorts();
+        }
+
+        async function loadVideos(query = '') {
+            const url = query 
+                ? `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${query}&type=video&maxResults=30&key=${API_KEY}`
+                : `https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&chart=mostPopular&regionCode=JP&maxResults=30&key=${API_KEY}`;
+            
+            const res = await fetch(url);
             const data = await res.json();
-            const ch = data.items[0];
-            document.getElementById('channel-content').innerHTML = `
-                <div style="text-align:center; padding-top:20px;">
-                    <img src="${ch.snippet.thumbnails.medium.url}" style="border-radius:50%; width:100px;">
-                    <h2>${ch.snippet.title}</h2>
-                    <p>${ch.statistics.subscriberCount} チャンネル登録者</p>
-                    <div class="category-item" style="display:inline-block">チャンネル登録</div>
-                </div>
-            `;
+            renderVideos(data.items, query ? 'search-page' : 'home-page');
         }
 
-        function closeChannel() {
-            document.getElementById('channel-overlay').style.display = 'none';
+        function renderVideos(items, targetId) {
+            const target = document.getElementById(targetId);
+            target.innerHTML = items.map(item => {
+                const id = item.id.videoId || item.id;
+                return `
+                <div class="video-card">
+                    <img class="thumbnail" src="${item.snippet.thumbnails.high.url}" onclick="openPlayer('${id}')">
+                    <div class="video-info">
+                        <div class="ch-click-area" onclick="openChannel('${item.snippet.channelId}')">
+                            <div class="channel-icon"></div>
+                            <div class="video-text">
+                                <strong>${item.snippet.title}</strong>
+                                <p>${item.snippet.channelTitle}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
         }
 
-        // 初期ロード
-        loadVideos();
+        function searchVideos() {
+            const q = document.getElementById('searchInput').value;
+            switchTab('search');
+            loadVideos(q);
+        }
+
+        function openPlayer(id) {
+            document.getElementById('player-overlay').style.display = 'block';
+            document.getElementById('player-container').innerHTML = `<iframe width="100%" height="300px" src="https://www.youtube.com/embed/${id}?autoplay=1" frameborder="0" allowfullscreen></iframe>`;
+        }
+
+        function closePlayer() { document.getElementById('player-overlay').style.display = 'none'; document.getElementById('player-container').innerHTML = ''; }
+
+        function openChannel(id) {
+            alert("チャンネルページを表示します (ID: " + id + ")");
+            // ここに前回のチャンネルオーバーレイ処理を統合
+        }
+
+        function changeAccent(color) {
+            document.documentElement.style.setProperty('--accent-color', color);
+        }
+
+        function toggleSettings() {
+            const panel = document.getElementById('settings-panel');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function filterCategory(cat, btn) {
+            document.querySelectorAll('.category-item').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            loadVideos(cat === 'すべて' ? '' : cat);
+        }
     </script>
 </body>
 </html>
