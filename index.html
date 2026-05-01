@@ -4,162 +4,100 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>YangTube</title>
-
-    <!-- PWA用の設定：アプリとして動かすための合図 -->
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-
-    <!-- サービスワーカーの登録：ホーム画面追加に必須 -->
-    <script>
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js')
-          .then(() => console.log('YangTube: Ready'))
-          .catch((err) => console.log('YangTube: Error', err));
-      }
-    </script>
-
-    <!-- Material Designのアイコン読み込み -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    
     <style>
-        /* Material Design 3 っぽいデザイン */
-        body {
-            margin: 0;
-            font-family: 'Roboto', sans-serif;
-            background-color: #fefefe;
-            color: #1c1b1f;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-        }
-
-        /* ヘッダー：丸みのある検索窓 */
-        header {
-            background-color: #fff;
-            padding: 12px 16px;
-            display: flex;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .search-bar {
-            background-color: #f3f3f3;
-            border-radius: 28px;
-            display: flex;
-            flex: 1;
-            padding: 10px 20px;
-            align-items: center;
-            box-shadow: inset 0 0 1px rgba(0,0,0,0.2);
-        }
-
-        .search-bar input {
-            border: none;
-            background: transparent;
-            flex: 1;
-            font-size: 16px;
-            outline: none;
-            padding-left: 8px;
-        }
-
-        /* 動画リスト：iPadでも綺麗に見えるグリッド */
-        main {
-            padding: 16px;
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 24px;
-            overflow-y: auto;
-        }
-
-        /* 動画カード */
-        .video-card {
-            background: #fff;
-            border-radius: 16px;
-            overflow: hidden;
-            transition: transform 0.2s;
-        }
-
-        .video-card:active {
-            transform: scale(0.98);
-        }
-
-        .thumbnail {
-            width: 100%;
-            aspect-ratio: 16 / 9;
-            background-color: #e1e1e1;
-            border-radius: 12px;
-            background-size: cover;
-            background-position: center;
-        }
-
-        .video-info {
-            padding: 12px 4px;
-            display: flex;
-            gap: 12px;
-        }
-
-        .channel-icon {
-            width: 40px;
-            height: 40px;
-            background-color: #d1d1d1;
-            border-radius: 50%;
-            flex-shrink: 0;
-        }
-
-        .text-info h3 {
-            margin: 0;
-            font-size: 15px;
-            font-weight: 500;
-            line-height: 1.4;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        .text-info p {
-            margin: 4px 0 0;
-            font-size: 13px;
-            color: #606060;
-        }
+        body { margin: 0; font-family: 'Roboto', sans-serif; background-color: #fefefe; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        header { background: #fff; padding: 12px 16px; display: flex; align-items: center; z-index: 100; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .search-bar { background: #f3f3f3; border-radius: 28px; display: flex; flex: 1; padding: 8px 16px; align-items: center; }
+        .search-bar input { border: none; background: transparent; flex: 1; font-size: 16px; outline: none; padding-left: 8px; }
+        #player-container { display: none; width: 100%; background: #000; aspect-ratio: 16/9; }
+        iframe { width: 100%; height: 100%; border: none; }
+        main { padding: 16px; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; overflow-y: auto; flex: 1; }
+        .video-card { background: #fff; border-radius: 12px; overflow: hidden; cursor: pointer; }
+        .thumbnail { width: 100%; aspect-ratio: 16/9; background-size: cover; background-position: center; border-radius: 12px; }
+        .video-info { padding: 10px 4px; }
+        .video-info h3 { margin: 0; font-size: 14px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .video-info p { margin: 4px 0 0; font-size: 12px; color: #606060; }
     </style>
 </head>
 <body>
 
     <header>
         <div class="search-bar">
-            <span class="material-icons" style="color: #444;">search</span>
+            <span class="material-icons" onclick="closePlayer()" id="back-btn" style="display:none; margin-right:8px; cursor:pointer;">arrow_back</span>
+            <span class="material-icons">search</span>
             <input type="text" placeholder="YangTubeで検索">
         </div>
     </header>
 
-    <main>
-        <!-- サンプルの動画カード -->
-        <div class="video-card">
-            <div class="thumbnail" style="background-image: url('https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&q=80&w=640');"></div>
-            <div class="video-info">
-                <div class="channel-icon"></div>
-                <div class="text-info">
-                    <h3>YangTubeへようこそ！次はAPIを設定して本物の動画を表示させよう</h3>
-                    <p>YangTube Official • 120万回視聴 • 1時間前</p>
-                </div>
-            </div>
-        </div>
+    <div id="player-container"></div>
 
-        <div class="video-card">
-            <div class="thumbnail"></div>
-            <div class="video-info">
-                <div class="channel-icon"></div>
-                <div class="text-info">
-                    <h3>サンプル動画：プログラミング学習中</h3>
-                    <p>あなたのチャンネル • 500回視聴 • 3日前</p>
-                </div>
-            </div>
-        </div>
+    <main id="video-list">
+        <p style="text-align:center; color:#888;">検索窓にキーワードを入れて動画を探してね</p>
     </main>
 
+    <script>
+        // 
+        const API_KEY = 'AIzaSyCsAe_J968Z05UXBbqHHhI7iVSZMnjyTdo'; 
+
+        const searchInput = document.querySelector('.search-bar input');
+        const videoList = document.getElementById('video-list');
+        const playerContainer = document.getElementById('player-container');
+        const backBtn = document.getElementById('back-btn');
+
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                searchVideos(searchInput.value);
+                closePlayer();
+                searchInput.blur();
+            }
+        });
+
+        async function searchVideos(query) {
+            const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&key=${API_KEY}&type=video&maxResults=12`;
+            try {
+                const res = await fetch(url);
+                const data = await res.json();
+                if (data.items) {
+                    renderVideos(data.items);
+                } else {
+                    alert('動画が見つかりませんでした。APIキーを確認してください。');
+                }
+            } catch (err) { alert('通信エラーが発生しました'); }
+        }
+
+        function renderVideos(videos) {
+            videoList.innerHTML = '';
+            videos.forEach(v => {
+                const div = document.createElement('div');
+                div.className = 'video-card';
+                div.onclick = () => playVideo(v.id.videoId);
+                div.innerHTML = `
+                    <div class="thumbnail" style="background-image:url('${v.snippet.thumbnails.high.url}')"></div>
+                    <div class="video-info">
+                        <h3>${v.snippet.title}</h3>
+                        <p>${v.snippet.channelTitle}</p>
+                    </div>
+                `;
+                videoList.appendChild(div);
+            });
+        }
+
+        function playVideo(id) {
+            playerContainer.style.display = 'block';
+            playerContainer.innerHTML = `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+            backBtn.style.display = 'block';
+            window.scrollTo(0, 0);
+        }
+
+        function closePlayer() {
+            playerContainer.style.display = 'none';
+            playerContainer.innerHTML = '';
+            backBtn.style.display = 'none';
+        }
+    </script>
 </body>
 </html>
