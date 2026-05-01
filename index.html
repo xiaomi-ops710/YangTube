@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>My YouTube App</title>
+    <!-- Material Designのアイコンを読み込む -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        /* 全体のデザイン設定 */
+        body {
+            margin: 0;
+            font-family: 'Roboto', sans-serif;
+            background-color: #f9f9f9; /* 明るいグレー */
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* ヘッダー（検索窓があるところ） */
+        header {
+            background-color: white;
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .search-bar {
+            background-color: #f1f1f1;
+            border-radius: 24px; /* Material Designらしい角丸 */
+            display: flex;
+            flex: 1;
+            padding: 8px 16px;
+            align-items: center;
+        }
+
+        .search-bar input {
+            border: none;
+            background: transparent;
+            flex: 1;
+            font-size: 16px;
+            outline: none;
+        }
+
+        /* 動画が並ぶエリア */
+        main {
+            padding: 16px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            overflow-y: auto;
+        }
+
+        /* 動画カード（Material Design風） */
+        .video-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+        }
+
+        .thumbnail {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background-color: #ddd; /* あとで画像が入る場所 */
+        }
+
+        .video-info {
+            padding: 12px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .channel-icon {
+            width: 36px;
+            height: 36px;
+            background-color: #ccc;
+            border-radius: 50%;
+        }
+
+        .text-info h3 {
+            margin: 0;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .text-info p {
+            margin: 4px 0 0;
+            font-size: 12px;
+            color: #606060;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="search-bar">
+            <input type="text" placeholder="YouTubeを検索">
+            <span class="material-icons" style="color: #606060;">search</span>
+        </div>
+    </header>
+
+    <main>
+        <!-- テスト用のダミーカード（あとでJavaScriptで自動生成します） -->
+        <div class="video-card">
+            <div class="thumbnail" style="background-image: url('https://via.placeholder.com/640x360'); background-size: cover;"></div>
+            <div class="video-info">
+                <div class="channel-icon"></div>
+                <div class="text-info">
+                    <h3>ここに動画のタイトルが表示されます（サンプル）</h3>
+                    <p>チャンネル名 • 10万回視聴 • 1日前</p>
+                </div>
+            </div>
+        </div>
+        <!-- 他にもいくつか並べてみる -->
+        <div class="video-card"><div class="thumbnail"></div><div class="video-info"><div class="channel-icon"></div><div class="text-info"><h3>プログラミング勉強中！</h3><p>My Channel</p></div></div></div>
+    </main>
+
+</body>
+</html>
