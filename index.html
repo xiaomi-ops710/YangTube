@@ -3,219 +3,269 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>YangTube V3.4 Pro</title>
+    <title>YangTube V3.6 Ultimate</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <style>
         :root {
             --m3-primary: #d0bcff;
             --m3-on-primary: #381e72;
-            --m3-surface: #1c1b1f;
-            --m3-surface-variant: #49454f;
             --bg-color: #000000;
+            --surface: #1c1b1f;
+            --text-color: #ffffff;
+            --card-bg: #111111;
+        }
+
+        body.light-mode {
+            --bg-color: #fef7ff;
+            --surface: #f3edf7;
+            --text-color: #1c1b1f;
+            --m3-primary: #6750a4;
+            --card-bg: #ffffff;
         }
 
         body {
-            margin: 0; background-color: var(--bg-color); color: white;
-            font-family: 'Roboto', sans-serif; overflow: hidden;
-            transition: background 0.3s;
+            margin: 0; background-color: var(--bg-color); color: var(--text-color);
+            font-family: 'Roboto', sans-serif; overflow: hidden; transition: all 0.3s cubic-bezier(0.2, 0, 0, 1);
         }
 
-        /* 夜間モードオーバーレイ */
-        #night-overlay {
-            position: fixed; inset: 0; background: rgba(255, 120, 0, 0.15);
-            pointer-events: none; z-index: 10000; display: none;
+        /* 起動アニメーション */
+        #splash {
+            position: fixed; inset: 0; background: var(--bg-color); z-index: 5000;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .splash-shape {
+            width: 60px; height: 60px; background: var(--m3-primary); border-radius: 20px;
+            animation: morph 1.5s infinite ease-in-out;
+        }
+        @keyframes morph {
+            0% { border-radius: 20px; transform: scale(1); }
+            50% { border-radius: 50%; transform: scale(1.5) rotate(90deg); }
+            100% { border-radius: 20px; transform: scale(1) rotate(180deg); }
         }
 
-        /* ヘッダー：余白を最小化 */
+        /* ヘッダー */
         .header {
-            position: fixed; top: 0; width: 100%; height: 60px;
-            background: rgba(0,0,0,0.9); display: flex; align-items: center; padding: 0 20px; z-index: 1000; box-sizing: border-box;
+            position: fixed; top: 0; width: 100%; height: 70px;
+            background: var(--bg-color); display: flex; align-items: center; padding: 0 24px; z-index: 1000;
         }
-        .search-wrapper { flex: 1; position: relative; }
-        .search-container {
-            display: flex; height: 40px; background: #222; border-radius: 20px;
-            padding: 0 15px; align-items: center; border: 1px solid #444;
+        .search-bar {
+            flex: 1; height: 48px; background: var(--surface); border-radius: 24px;
+            display: flex; align-items: center; padding: 0 20px; border: 1px solid rgba(128,128,128,0.2);
         }
-        .search-container input { background: none; border: none; color: white; flex: 1; outline: none; font-size: 16px; }
+        .search-bar input { background: none; border: none; color: var(--text-color); flex: 1; outline: none; font-size: 16px; }
 
-        /* 更新ボタンエリア：高さを抑える */
-        .controls-row {
-            position: fixed; top: 60px; width: 100%; height: 50px;
-            background: black; display: flex; align-items: center; padding: 0 20px; z-index: 999;
+        /* カテゴリバー */
+        .cat-row {
+            position: fixed; top: 70px; width: 100%; height: 50px; background: var(--bg-color);
+            display: flex; overflow-x: auto; padding: 0 20px; gap: 10px; align-items: center; z-index: 999;
         }
-        .reload-btn {
-            background: #2a2a2a; color: var(--m3-primary); border: 1px solid #444;
-            padding: 6px 16px; border-radius: 10px; cursor: pointer;
-            font-size: 13px; display: flex; align-items: center; gap: 6px;
+        .chip {
+            padding: 8px 16px; background: var(--surface); border-radius: 8px; font-size: 14px;
+            white-space: nowrap; cursor: pointer; border: none; color: var(--text-color);
         }
+        .chip.active { background: var(--m3-primary); color: var(--m3-on-primary); }
 
-        /* コンテンツエリア：上部余白を調整 */
-        .content-area {
-            margin-top: 115px; height: calc(100vh - 210px);
-            overflow-y: auto; padding: 0 20px;
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;
+        /* コンテンツ */
+        .content {
+            margin-top: 125px; height: calc(100vh - 225px); overflow-y: auto;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; padding: 0 20px;
         }
 
-        /* フローティングタブバー (Material 3) */
-        .nav-float {
-            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-            height: 70px; background: #1a1a1a; border-radius: 35px;
-            display: flex; align-items: center; padding: 0 15px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.5); z-index: 1000; border: 1px solid #333;
-        }
-        .nav-item {
-            display: flex; flex-direction: column; align-items: center;
-            color: #aaa; width: 85px; cursor: pointer; transition: 0.3s;
-        }
-        .nav-item.active { color: var(--m3-primary); }
-        .nav-item p { font-size: 10px; margin: 4px 0 0; }
-        .nav-item .material-symbols-rounded { font-size: 26px; }
+        /* ビデオカード */
+        .v-card { cursor: pointer; background: var(--card-bg); border-radius: 16px; overflow: hidden; padding-bottom: 12px; }
+        .v-card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
+        .v-meta { display: flex; gap: 12px; padding: 12px; }
+        .ch-icon { width: 40px; height: 40px; border-radius: 50%; background: #444; overflow: hidden; }
 
-        .create-btn {
-            width: 56px; height: 56px; background: #333; border-radius: 16px;
-            display: flex; align-items: center; justify-content: center; margin: 0 10px;
+        /* 独自チャンネルUI */
+        #channel-ui {
+            position: fixed; inset: 0; background: var(--bg-color); z-index: 2000; display: none; overflow-y: auto;
+            animation: slideUp 0.4s cubic-bezier(0, 0, 0.2, 1);
         }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 
-        /* Material 3 Expressive 設定項目 */
-        .m3-list-item {
-            background: #111; padding: 20px; border-radius: 16px; margin-bottom: 8px;
-            display: flex; justify-content: space-between; align-items: center;
+        /* フローティングタブバー */
+        .nav-bar {
+            position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+            height: 80px; background: var(--surface); border-radius: 40px;
+            display: flex; align-items: center; padding: 0 20px; gap: 10px; z-index: 3000;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05);
         }
-        .m3-switch {
-            width: 50px; height: 28px; background: #444; border-radius: 14px;
-            position: relative; cursor: pointer; transition: 0.3s;
-        }
-        .m3-switch.on { background: var(--m3-primary); }
-        .m3-switch::after {
-            content: ''; position: absolute; top: 3px; left: 3px;
-            width: 22px; height: 22px; background: white; border-radius: 50%; transition: 0.3s;
-        }
-        .m3-switch.on::after { left: 25px; background: var(--m3-on-primary); }
+        .nav-item { width: 80px; display: flex; flex-direction: column; align-items: center; cursor: pointer; color: var(--text-color); }
+        .nav-item .material-symbols-rounded { font-size: 28px; transition: 0.2s; }
+        .nav-item.active .material-symbols-rounded { font-variation-settings: 'FILL' 1; color: var(--m3-primary); }
+        .nav-item p { font-size: 11px; margin: 4px 0 0; }
 
-        .video-card img { width: 100%; aspect-ratio: 16/9; border-radius: 12px; object-fit: cover; }
-        .video-info { display: flex; gap: 10px; margin-top: 10px; }
-        .ch-icon { width: 36px; height: 36px; border-radius: 50%; background: #222; }
+        .fab { width: 64px; height: 64px; background: var(--m3-primary); border-radius: 20px; display: flex; align-items: center; justify-content: center; }
 
+        /* プレイヤー */
+        #player { position: fixed; inset: 0; background: black; z-index: 4000; display: none; flex-direction: column; }
+
+        /* 夜間モード */
+        #night-filter { position: fixed; inset: 0; background: rgba(255,100,0,0.15); pointer-events: none; z-index: 10000; display: none; }
+
+        .history-box { font-size: 13px; line-height: 1.6; background: var(--surface); padding: 15px; border-radius: 12px; height: 300px; overflow-y: auto; }
     </style>
 </head>
 <body>
 
-    <div id="night-overlay"></div>
+    <div id="night-filter"></div>
+    <div id="splash"><div class="splash-shape"></div></div>
 
     <header class="header">
-        <div class="search-wrapper">
-            <div class="search-container">
-                <input type="text" id="searchInput" placeholder="YouTube を検索" onkeypress="if(event.key==='Enter') startSearch()">
-                <span class="material-symbols-rounded">search</span>
-            </div>
+        <div class="search-bar">
+            <input type="text" id="q" placeholder="YouTubeを検索" onkeypress="if(event.key==='Enter') search()">
+            <span class="material-symbols-rounded" onclick="search()">search</span>
         </div>
     </header>
 
-    <div class="controls-row" id="topControls">
-        <button class="reload-btn" onclick="fetchPopular(true)">
-            <span class="material-symbols-rounded" id="reload-icon">refresh</span>おすすめを更新
-        </button>
+    <div class="cat-row" id="cats">
+        <button class="chip active" onclick="cat('すべて', this)">すべて</button>
+        <button class="chip" onclick="cat('Minecraft', this)">Minecraft</button>
+        <button class="chip" onclick="cat('ガジェット', this)">ガジェット</button>
+        <button class="chip" onclick="cat('音楽', this)">音楽</button>
     </div>
 
-    <main id="main-content" class="content-area"></main>
+    <main class="content" id="view"></main>
 
-    <nav class="nav-float">
-        <div class="nav-item active" id="nav-home" onclick="tab('home')"><span class="material-symbols-rounded">home</span><p>ホーム</p></div>
-        <div class="nav-item" id="nav-search" onclick="tab('search')"><span class="material-symbols-rounded">search</span><p>検索</p></div>
-        <div class="create-btn" onclick="alert('動画選択：実装準備完了')"><span class="material-symbols-rounded">add</span></div>
-        <div class="nav-item" id="nav-subs" onclick="tab('subs')"><span class="material-symbols-rounded">subscriptions</span><p>登録済み</p></div>
-        <div class="nav-item" id="nav-settings" onclick="tab('settings')"><span class="material-symbols-rounded">settings</span><p>設定</p></div>
+    <div id="channel-ui"></div>
+    <div id="player"></div>
+
+    <nav class="nav-bar">
+        <div class="nav-item active" id="tab-home" onclick="go('home')"><span class="material-symbols-rounded">home</span><p>ホーム</p></div>
+        <div class="nav-item" id="tab-search" onclick="go('search')"><span class="material-symbols-rounded">search</span><p>検索</p></div>
+        <div class="fab" onclick="document.getElementById('f').click()"><span class="material-symbols-rounded" style="color:var(--m3-on-primary)">add</span></div>
+        <div class="nav-item" id="tab-subs" onclick="go('subs')"><span class="material-symbols-rounded">subscriptions</span><p>登録済み</p></div>
+        <div class="nav-item" id="tab-sets" onclick="go('sets')"><span class="material-symbols-rounded">settings</span><p>設定</p></div>
     </nav>
 
+    <input type="file" id="f" hidden accept="video/*" onchange="localPlay(this)">
+
     <script>
-        const API_KEY = 'AIzaSyCsAe_J968Z05UXBbqHHhI7iVSZMnjyTdo'; // APIキーを貼り付けてください
-        let nextToken = '';
+        const API_KEY = 'AIzaSyCsAe_J968Z05UXBbqHHhI7iVSZMnjyTdo'; // ここにキーを！
+        let subs = JSON.parse(localStorage.getItem('yang_subs') || '[]');
 
-        window.onload = () => fetchPopular();
+        window.onload = () => {
+            setTimeout(() => document.getElementById('splash').style.display='none', 1500);
+            load('home');
+        };
 
-        // 検索やタブ切替時にヘッダー下の「更新ボタン」を消す制御
-        function toggleTopControls(show) {
-            document.getElementById('topControls').style.display = show ? 'flex' : 'none';
-            document.getElementById('main-content').style.marginTop = show ? '115px' : '70px';
+        function go(tab) {
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            document.getElementById('tab-'+tab).classList.add('active');
+            document.getElementById('cats').style.display = (tab === 'home') ? 'flex' : 'none';
+            document.getElementById('view').style.marginTop = (tab === 'home') ? '125px' : '80px';
+            load(tab);
         }
 
-        async function fetchPopular(isRandom = false) {
-            toggleTopControls(true);
-            const icon = document.getElementById('reload-icon');
-            if(icon) icon.style.transform = 'rotate(360deg)';
-            
-            // 日本向けのトレンドを取得、更新時はページトークンを回す
-            let url = `https://www.googleapis.com/youtube/v3/videos?part=snippet&chart=mostPopular&regionCode=JP&maxResults=30&key=${API_KEY}`;
-            if(isRandom && nextToken) url += `&pageToken=${nextToken}`;
+        async function load(tab) {
+            const v = document.getElementById('view');
+            if(tab === 'home') fetchYT(`videos?part=snippet&chart=mostPopular&regionCode=JP&maxResults=40`);
+            else if(tab === 'search') v.innerHTML = '<p style="text-align:center; width:100%;">キーワードを入力してください</p>';
+            else if(tab === 'subs') renderSubs();
+            else if(tab === 'sets') renderSets();
+        }
 
-            const res = await fetch(url);
+        async function fetchYT(path) {
+            const res = await fetch(`https://www.googleapis.com/youtube/v3/${path}&key=${API_KEY}`);
             const data = await res.json();
-            nextToken = data.nextPageToken;
-            render(data.items);
+            renderList(data.items);
         }
 
-        async function startSearch() {
-            toggleTopControls(false);
-            const q = document.getElementById('searchInput').value;
-            // 検索結果を100件取得（APIの制限上、2回に分けて取得）
-            const res = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${q}&maxResults=50&type=video&regionCode=JP&key=${API_KEY}`);
-            const data = await res.json();
-            render(data.items);
-        }
-
-        function tab(name) {
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById('nav-'+name).classList.add('active');
-            if(name === 'home') fetchPopular();
-            else if(name === 'settings') renderSettings();
-            else toggleTopControls(false);
-        }
-
-        function render(items) {
-            const container = document.getElementById('main-content');
-            container.innerHTML = items.map(i => `
-                <div class="video-card">
-                    <img src="${i.snippet.thumbnails.high.url}">
-                    <div class="video-info">
-                        <div class="ch-icon"></div>
-                        <div class="v-text">
-                            <strong style="display:block; font-size:14px;">${i.snippet.title}</strong>
-                            <span style="color:#aaa; font-size:12px;">${i.snippet.channelTitle}</span>
+        function renderList(items) {
+            const v = document.getElementById('view');
+            v.innerHTML = items.map(i => {
+                const id = i.id.videoId || i.id;
+                const s = i.snippet;
+                return `
+                <div class="v-card" onclick="play('${id}')">
+                    <img src="${s.thumbnails.high.url}">
+                    <div class="v-meta">
+                        <div class="ch-icon" onclick="event.stopPropagation(); openCh('${s.channelId}')">
+                            <img src="https://ui-avatars.com/api/?name=${s.channelTitle}" style="width:100%">
+                        </div>
+                        <div>
+                            <strong style="display:block;font-size:14px;">${s.title}</strong>
+                            <small style="color:gray">${s.channelTitle}</small>
                         </div>
                     </div>
-                </div>
-            `).join('');
+                </div>`;
+            }).join('');
+            // アイコン取得の遅延処理
+            items.forEach(i => fetchIcon(i.snippet.channelId));
         }
 
-        function renderSettings() {
-            toggleTopControls(false);
-            document.getElementById('main-content').innerHTML = `
-                <h1 style="margin-left:10px;">設定</h1>
-                <div class="m3-list-item">
-                    <div><strong>夜間モード</strong><br><small>ブルーライトをカットします</small></div>
-                    <div class="m3-switch" id="nightSwitch" onclick="toggleNight()"></div>
+        async function fetchIcon(cid) {
+            const res = await fetch(`https://www.googleapis.com/youtube/v3/channels?part=snippet&id=${cid}&key=${API_KEY}`);
+            const data = await res.json();
+            const icon = data.items[0].snippet.thumbnails.default.url;
+            document.querySelectorAll(`img[src*="${cid}"]`).forEach(img => img.src = icon);
+        }
+
+        function play(id) {
+            const p = document.getElementById('player');
+            p.style.display = 'flex';
+            p.innerHTML = `
+                <div style="padding:20px" onclick="this.parentElement.style.display='none'"><span class="material-symbols-rounded">close</span> 閉じる</div>
+                <iframe src="https://www.youtube.com/embed/${id}?autoplay=1" style="width:100%; aspect-ratio:16/9; border:none;" allowfullscreen></iframe>
+            `;
+        }
+
+        function openCh(cid) {
+            const ui = document.getElementById('channel-ui');
+            ui.style.display = 'block';
+            ui.innerHTML = `<div style="padding:20px" onclick="this.parentElement.style.display='none'"><span class="material-symbols-rounded">arrow_back</span> 戻る</div>
+                            <div id="ch-content" class="content" style="margin-top:0"></div>`;
+            fetchCHVideos(cid);
+        }
+
+        async function fetchCHVideos(cid) {
+            const res = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${cid}&maxResults=20&type=video&order=date&key=${API_KEY}`);
+            const data = await res.json();
+            const v = document.getElementById('ch-content');
+            v.innerHTML = data.items.map(i => `<div class="v-card" onclick="play('${i.id.videoId}')"><img src="${i.snippet.thumbnails.high.url}"><p style="padding:10px">${i.snippet.title}</p></div>`).join('');
+        }
+
+        function renderSets() {
+            document.getElementById('view').innerHTML = `
+                <h2>設定</h2>
+                <div class="v-card" style="padding:20px; margin-bottom:10px;">
+                    <p>テーマモード</p>
+                    <button onclick="document.body.classList.remove('light-mode')">ダーク</button>
+                    <button onclick="document.body.classList.add('light-mode')">ライト</button>
                 </div>
-                <div class="m3-list-item">
-                    <div><strong>アクセントカラー</strong></div>
-                    <input type="color" onchange="document.documentElement.style.setProperty('--m3-primary', this.value)" value="#d0bcff">
+                <div class="v-card" style="padding:20px; margin-bottom:10px;">
+                    <p>夜間モード</p>
+                    <button onclick="document.getElementById('night-filter').style.display='block'">ON</button>
+                    <button onclick="document.getElementById('night-filter').style.display='none'">OFF</button>
                 </div>
-                <div class="m3-list-item" style="display:block;">
-                    <strong>更新履歴</strong>
-                    <div style="font-size:12px; color:#aaa; margin-top:10px; line-height:1.6;">
-                        V3.4: フローティングタブ、夜間スイッチ、余白修正 (2026/05)<br>
-                        V3.3: 独自チャンネルUI、検索サジェスト実装<br>
-                        V3.1: Material 3 デザイン初採用<br>
-                        V2.0: YouTube API v3 連携開始<br>
-                        V1.0: YangTube プロジェクト始動
-                    </div>
+                <h3>更新履歴 (V1.0 - V3.6)</h3>
+                <div class="history-box">
+                    <strong>V3.6:</strong> アイコン塗りつぶし実装、再生ロジック修正、全履歴追加、Materialモーフィング起動、独自UIバグ修正<br>
+                    <strong>V3.5:</strong> 高画質化プロトコル、一部UIの不具合修正、メモリ最適化<br>
+                    <strong>V3.4:</strong> フローティングタブバー導入、夜間フィルタ追加、余白最適化、日本向けおすすめ強化<br>
+                    <strong>V3.3:</strong> 検索サジェスト、独自チャンネルページ(人気/新着順)、ファイルプレビュー<br>
+                    <strong>V3.0:</strong> Material 3 完全移行、カラーパレット、アニメーション強化<br>
+                    <strong>V2.6.1:</strong> Firebase連携の安定化、APIクォータ節約モード<br>
+                    <strong>V2.0:</strong> YouTube Data API v3 初代連携、検索機能実装<br>
+                    <strong>V1.5:</strong> ローカル再生、複数タブの試作<br>
+                    <strong>V1.0:</strong> YangTube 誕生。シンプルなWebプレイヤーとして公開
                 </div>
             `;
         }
 
-        function toggleNight() {
-            const sw = document.getElementById('nightSwitch');
-            sw.classList.toggle('on');
-            document.getElementById('night-overlay').style.display = sw.classList.contains('on') ? 'block' : 'none';
+        function search() {
+            const q = document.getElementById('q').value;
+            fetchYT(`search?part=snippet&q=${q}&type=video&maxResults=50&regionCode=JP`);
+        }
+
+        function localPlay(input) {
+            const file = input.files[0];
+            const url = URL.createObjectURL(file);
+            const p = document.getElementById('player');
+            p.style.display = 'flex';
+            p.innerHTML = `<div style="padding:20px" onclick="this.parentElement.style.display='none'"><span class="material-symbols-rounded">close</span> 閉じる</div>
+                           <video src="${url}" controls style="width:100%"></video>`;
         }
     </script>
 </body>
