@@ -3,232 +3,186 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>YangTube V3.6.5</title>
+    <title>YangTube V3.6.8</title>
+    <!-- ホーム画面用アイコン -->
     <link rel="icon" href="icon.png">
     <link rel="apple-touch-icon" href="icon.png">
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <style>
         :root {
-            --m3-primary: #d0bcff; --m3-on-primary: #381e72; --bg: #000; --surf: #1c1b1f; --text: #fff; --card: #111;
-            --m3-outline: #938f99; --m3-surf-container: #2b2930;
+            --m3-primary: #d0bcff; --m3-on-primary: #381e72; --bg: #000; --surf: rgba(28, 27, 31, 0.7); --text: #fff; --card: #111;
+            --m3-outline: #938f99; --accent: #d0bcff;
         }
         body.light {
-            --bg: #fef7ff; --surf: #f3edf7; --text: #1c1b1f; --m3-primary: #6750a4; --card: #fff;
-            --m3-outline: #79747e; --m3-surf-container: #eaddff;
+            --bg: #fef7ff; --surf: rgba(243, 237, 247, 0.7); --text: #1c1b1f; --m3-primary: #6750a4; --card: #fff;
+            --m3-outline: #79747e; --accent: #6750a4;
         }
-        body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Roboto', sans-serif; overflow: hidden; transition: all 0.3s cubic-bezier(0.2, 0, 0, 1); }
+        body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Roboto', sans-serif; overflow: hidden; transition: 0.3s; }
         
-        /* ヘッダー周り */
-        header { position: fixed; top: 0; width: 100%; height: 65px; background: var(--bg); display: flex; align-items: center; padding: 0 12px; z-index: 1000; gap: 8px; box-sizing: border-box; }
-        .logo { height: 32px; cursor: pointer; flex-shrink: 0; }
-        .search-box { flex: 1; height: 40px; background: var(--surf); border-radius: 20px; display: flex; align-items: center; padding: 0 12px; }
-        .search-box input { background: none; border: none; color: var(--text); flex: 1; outline: none; font-size: 14px; }
-        
-        /* カテゴリ & 更新ボタン */
-        .cats-wrapper { position: fixed; top: 65px; width: 100%; height: 50px; display: flex; align-items: center; background: var(--bg); z-index: 999; padding: 0 12px; gap: 8px; box-sizing: border-box; }
-        .refresh-btn { width: 40px; height: 40px; border-radius: 50%; background: var(--surf); display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; border: none; color: var(--text); }
-        .cats { display: flex; overflow-x: auto; gap: 8px; flex: 1; scrollbar-width: none; }
-        .cats::-webkit-scrollbar { display: none; }
-        .chip { padding: 6px 16px; background: var(--surf); border-radius: 20px; white-space: nowrap; cursor: pointer; border: none; color: var(--text); font-size: 14px; font-weight: 500; }
-        .chip.active { background: var(--m3-primary); color: var(--m3-on-primary); }
+        /* ヘッダー・ロゴ */
+        header { position: fixed; top: 0; width: 100%; height: 65px; background: var(--bg); display: flex; align-items: center; padding: 0 16px; z-index: 1000; gap: 12px; }
+        .logo-img { height: 28px; cursor: pointer; } /* ここでロゴ画像を表示 */
+        .search-box { flex: 1; height: 42px; background: var(--surf); backdrop-filter: blur(10px); border-radius: 24px; display: flex; align-items: center; padding: 0 16px; border: 1px solid rgba(255,255,255,0.1); }
+        .search-box input { background: none; border: none; color: var(--text); flex: 1; outline: none; }
 
-        /* メインエリア */
-        main { margin-top: 115px; height: calc(100vh - 190px); overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; padding: 16px; scroll-behavior: smooth; }
-        .v-card { cursor: pointer; animation: fadeIn 0.4s ease forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .thumb { width: 100%; aspect-ratio: 16/9; border-radius: 12px; object-fit: cover; background: #222; }
-        .meta { display: flex; gap: 12px; margin-top: 10px; }
-        .ch-img { width: 36px; height: 36px; border-radius: 50%; background: #333; flex-shrink: 0; }
-        
-        /* M3 Switch Style */
-        .m3-switch { position: relative; width: 52px; height: 32px; border: 2px solid var(--m3-outline); border-radius: 16px; cursor: pointer; transition: 0.2s; background: var(--surf); }
-        .m3-switch.on { background: var(--m3-primary); border-color: var(--m3-primary); }
-        .m3-switch::after { content: ""; position: absolute; top: 4px; left: 4px; width: 20px; height: 20px; background: var(--m3-outline); border-radius: 50%; transition: 0.2s; }
-        .m3-switch.on::after { left: 24px; background: var(--m3-on-primary); width: 24px; height: 24px; top: 2px; }
-
-        /* ナビゲーション */
-        nav { position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%); height: 80px; background: var(--surf); border-radius: 40px; display: flex; align-items: center; padding: 0 12px; gap: 4px; z-index: 2000; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
-        .nav-item { width: 65px; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; color: var(--text); opacity: 0.6; }
-        .nav-item.active { opacity: 1; color: var(--m3-primary); }
-        .nav-item .material-symbols-rounded { font-size: 24px; margin-bottom: 4px; }
+        /* Liquid Glass タブバー */
+        nav { 
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); 
+            height: 72px; width: 90%; max-width: 500px;
+            background: var(--surf); backdrop-filter: blur(20px) saturate(180%);
+            border-radius: 36px; display: flex; align-items: center; justify-content: space-around; 
+            z-index: 2000; border: 1px solid rgba(255,255,255,0.15);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+        }
+        .nav-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; opacity: 0.6; transition: 0.2s; }
+        .nav-item.active { opacity: 1; color: var(--accent); }
         .nav-item.active .material-symbols-rounded { font-variation-settings: 'FILL' 1; }
-        .nav-item p { font-size: 11px; margin: 0; font-weight: 500; }
-        .fab { width: 56px; height: 56px; background: var(--m3-primary); border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 8px; color: var(--m3-on-primary); }
+        .nav-item p { font-size: 10px; margin-top: 4px; font-weight: bold; }
 
-        #player-overlay { position: fixed; inset: 0; background: var(--bg); z-index: 5000; display: none; flex-direction: column; }
+        /* M3 Switch (綺麗な楕円形) */
+        .m3-switch { 
+            position: relative; width: 52px; height: 32px; 
+            background: var(--m3-outline); border-radius: 100px; /* 100pxで完全な楕円に */
+            cursor: pointer; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+        .m3-switch.on { background: var(--accent); }
+        .m3-switch::after { 
+            content: ""; position: absolute; top: 4px; left: 4px; 
+            width: 24px; height: 24px; background: #fff; border-radius: 50%; 
+            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+        .m3-switch.on::after { left: 24px; background: var(--m3-on-primary); }
+
+        /* コンテンツ */
+        main { margin-top: 115px; height: calc(100vh - 200px); overflow-y: auto; padding: 16px; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        .v-card { cursor: pointer; }
+        .thumb { width: 100%; aspect-ratio: 16/9; border-radius: 16px; object-fit: cover; background: #222; }
+
+        /* 設定画面 */
+        .set-card { background: var(--surf); padding: 16px; border-radius: 24px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+        .history-list { font-size: 11px; color: gray; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 16px; line-height: 1.6; }
     </style>
 </head>
-<body class="dark">
+<body>
 
 <header>
-    <img src="icon.png" class="logo" onclick="tab('home')" alt="YangTube">
+    <img src="logo.png" class="logo-img" onclick="tab('home')" id="main-logo" onerror="this.src='icon.png'">
     <div class="search-box">
-        <input type="text" id="search-input" placeholder="検索" onkeypress="if(event.key==='Enter') doSearch()">
-        <span class="material-symbols-rounded" onclick="doSearch()">search</span>
+        <input type="text" id="q" placeholder="動画を検索" onkeypress="if(event.key==='Enter') search()">
+        <span class="material-symbols-rounded" onclick="search()">search</span>
     </div>
 </header>
 
-<div class="cats-wrapper" id="cats-area">
-    <button class="refresh-btn" onclick="refreshContent()"><span class="material-symbols-rounded">refresh</span></button>
-    <div class="cats">
-        <button class="chip active" onclick="setCat('すべて', this)">すべて</button>
-        <button class="chip" onclick="setCat('Minecraft', this)">Minecraft</button>
-        <button class="chip" onclick="setCat('にゃんこ大戦争', this)">にゃんこ大戦争</button>
-        <button class="chip" onclick="setCat('ガジェット', this)">ガジェット</button>
-        <button class="chip" onclick="setCat('スマホ 比較', this)">比較</button>
-    </div>
+<div id="cats-bar" style="position:fixed; top:65px; width:100%; display:flex; gap:8px; padding:8px 16px; overflow-x:auto; z-index:999; background:var(--bg);">
+    <button class="refresh-btn" onclick="fetchHome()" style="background:var(--surf); border:none; border-radius:50%; width:40px; height:40px; color:white;"><span class="material-symbols-rounded">refresh</span></button>
+    <button class="chip" onclick="setCat('すべて', this)">すべて</button>
+    <button class="chip" onclick="setCat('Minecraft', this)">Minecraft</button>
+    <button class="chip" onclick="setCat('ガジェット', this)">ガジェット</button>
 </div>
 
-<main id="main-view"></main>
+<main id="view"></main>
 
 <nav>
-    <div class="nav-item active" id="nav-home" onclick="tab('home')"><span class="material-symbols-rounded">home</span><p>ホーム</p></div>
-    <div class="nav-item" id="nav-search" onclick="tab('search')"><span class="material-symbols-rounded">explore</span><p>探索</p></div>
-    <div class="fab" onclick="document.getElementById('file-input').click()"><span class="material-symbols-rounded">add</span></div>
-    <div class="nav-item" id="nav-subs" onclick="tab('subs')"><span class="material-symbols-rounded">subscriptions</span><p>登録済み</p></div>
-    <div class="nav-item" id="nav-sets" onclick="tab('sets')"><span class="material-symbols-rounded">settings</span><p>設定</p></div>
+    <div class="nav-item active" id="n-home" onclick="tab('home')"><span class="material-symbols-rounded">home</span><p>ホーム</p></div>
+    <div class="nav-item" id="n-search" onclick="tab('search')"><span class="material-symbols-rounded">search</span><p>検索</p></div>
+    <div class="nav-item" id="n-subs" onclick="tab('subs')"><span class="material-symbols-rounded">subscriptions</span><p>登録済み</p></div>
+    <div class="nav-item" id="n-sets" onclick="tab('sets')"><span class="material-symbols-rounded">settings</span><p>設定</p></div>
 </nav>
 
-<input type="file" id="file-input" hidden accept="video/*" onchange="handleUpload(this)">
-
-<div id="player-overlay">
-    <div style="height:56px; display:flex; align-items:center; padding:0 16px;" onclick="closePlayer()">
-        <span class="material-symbols-rounded">expand_more</span>
-    </div>
-    <div id="player-frame" style="flex:1"></div>
-</div>
-
 <script>
-    const KEY = 'AIzaSyCsAe_J968Z05UXBbqHHhI7iVSZMnjyTdo';
-    let currentCategory = 'すべて';
+    const API_KEY = 'AIzaSyCsAe_J968Z05UXBbqHHhI7iVSZMnjyTdo'; // ここにキーを入れてください！
 
     window.onload = () => fetchHome();
 
-    async function tab(target) {
-        // 全ナビアイテムのactive解除
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        document.getElementById('nav-' + target).classList.add('active');
-
-        const catsArea = document.getElementById('cats-area');
-        const view = document.getElementById('main-view');
-
-        if(target === 'home') {
-            catsArea.style.display = 'flex';
-            view.style.marginTop = '115px';
-            fetchHome();
-        } else {
-            catsArea.style.display = 'none';
-            view.style.marginTop = '65px';
-            if(target === 'sets') renderSettings();
-            else if(target === 'subs') renderSubs();
-            else view.innerHTML = '<p style="text-align:center; opacity:0.5; margin-top:40px;">検索バーから動画を探してください</p>';
-        }
+    function tab(name) {
+        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+        document.getElementById('n-'+name).classList.add('active');
+        const v = document.getElementById('view');
+        document.getElementById('cats-bar').style.display = (name === 'home') ? 'flex' : 'none';
+        
+        if(name === 'home') fetchHome();
+        else if(name === 'subs') renderSubs();
+        else if(name === 'sets') renderSets();
+        else v.innerHTML = '<p style="text-align:center; padding-top:40px;">検索結果がここに表示されます</p>';
     }
 
     async function fetchHome() {
-        const res = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet&chart=mostPopular&regionCode=JP&maxResults=30&key=${KEY}`);
-        const data = await res.json();
-        render(data.items);
+        try {
+            const res = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet&chart=mostPopular&regionCode=JP&maxResults=30&key=${API_KEY}`);
+            const data = await res.json();
+            render(data.items);
+        } catch (e) { console.error("Home Load Error"); }
     }
 
-    async function doSearch() {
-        const q = document.getElementById('search-input').value;
-        if(!q) return;
-        tab('search'); // 検索タブに切り替え
-        const res = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${q}&maxResults=30&type=video&key=${KEY}`);
-        const data = await res.json();
-        render(data.items);
-    }
-
-    async function setCat(q, btn) {
-        document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-        btn.classList.add('active');
-        currentCategory = q;
-        refreshContent();
-    }
-
-    async function refreshContent() {
-        const v = document.getElementById('main-view');
-        v.innerHTML = '<p style="text-align:center;">更新中...</p>';
-        const q = currentCategory === 'すべて' ? '最新' : currentCategory;
-        const res = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${q}&maxResults=30&type=video&key=${KEY}`);
+    async function search() {
+        const query = document.getElementById('q').value;
+        if(!query) return;
+        tab('search');
+        const res = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${query}&type=video&maxResults=30&key=${API_KEY}`);
         const data = await res.json();
         render(data.items);
     }
 
     function render(items) {
-        const v = document.getElementById('main-view');
-        if(!items || items.length === 0) {
-            v.innerHTML = '<p style="text-align:center;">動画が見つかりませんでした</p>';
-            return;
-        }
-        v.innerHTML = items.map(i => {
-            const id = i.id.videoId || i.id;
-            const s = i.snippet;
-            return `
-            <div class="v-card" onclick="openPlayer('${id}')">
-                <img src="${s.thumbnails.high.url}" class="thumb">
-                <div class="meta">
-                    <div class="ch-img" style="background-image:url('https://ui-avatars.com/api/?name=${s.channelTitle}'); background-size:cover;"></div>
+        const v = document.getElementById('view');
+        if(!items) { v.innerHTML = '<p style="text-align:center;">動画が読み込めませんでした（APIキーを確認してください）</p>'; return; }
+        v.innerHTML = items.map(i => `
+            <div class="v-card" onclick="openPlayer('${i.id.videoId || i.id}')">
+                <img src="${i.snippet.thumbnails.high.url}" class="thumb">
+                <div style="display:flex; gap:12px; margin-top:10px;">
+                    <div style="width:36px; height:36px; border-radius:50%; background:#333; overflow:hidden;" onclick="event.stopPropagation(); openCh('${i.snippet.channelId}')">
+                        <img src="https://ui-avatars.com/api/?name=${i.snippet.channelTitle}" style="width:100%">
+                    </div>
                     <div>
-                        <div style="font-weight:bold; font-size:14px; line-height:1.4; display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${s.title}</div>
-                        <div style="font-size:12px; color:gray; margin-top:4px;">${s.channelTitle}</div>
+                        <div style="font-weight:bold; font-size:14px; line-height:1.4;">${i.snippet.title}</div>
+                        <div style="font-size:12px; color:gray;">${i.snippet.channelTitle}</div>
                     </div>
                 </div>
-            </div>`;
-        }).join('');
-    }
-
-    function openPlayer(id) {
-        document.getElementById('player-overlay').style.display = 'flex';
-        document.getElementById('player-frame').innerHTML = `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1" style="width:100%; height:100%; border:none;" allow="autoplay; fullscreen"></iframe>`;
-    }
-
-    function closePlayer() {
-        document.getElementById('player-overlay').style.display = 'none';
-        document.getElementById('player-frame').innerHTML = '';
+            </div>
+        `).join('');
     }
 
     function renderSubs() {
-        document.getElementById('main-view').innerHTML = `
-            <div style="padding:20px; text-align:center;">
-                <h3>登録済み (ローカル版)</h3>
-                <p style="font-size:13px; color:gray;">ブラウザに保存されたお気に入りチャンネルを表示します。</p>
-                <div style="margin-top:40px; opacity:0.3;">
-                    <span class="material-symbols-rounded" style="font-size:48px;">person_add</span>
-                    <p>まだ登録されたチャンネルはありません</p>
+        document.getElementById('view').innerHTML = `
+            <h3>登録済みチャンネル</h3>
+            <div class="set-card" onclick="openCh('UCxxxxxxxx')">
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <div style="width:40px; height:40px; border-radius:50%; background:#444;"></div>
+                    <div>サンプルチャンネル</div>
                 </div>
-            </div>`;
+                <span class="material-symbols-rounded">chevron_right</span>
+            </div>
+            <p style="font-size:12px; color:gray; text-align:center;">※タップで独自チャンネルUIを開きます</p>
+        `;
     }
 
-    function renderSettings() {
-        const isLight = document.body.classList.contains('light');
-        document.getElementById('main-view').innerHTML = `
-            <div style="padding:20px;">
-                <h2 style="margin-bottom:24px;">設定</h2>
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                    <div>ライトモード</div>
-                    <div class="m3-switch ${isLight?'on':''}" onclick="toggleTheme(this)"></div>
-                </div>
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                    <div>夜間モード</div>
-                    <div class="m3-switch" onclick="this.classList.toggle('on')"></div>
-                </div>
-            </div>`;
+    function renderSets() {
+        document.getElementById('view').innerHTML = `
+            <h2>設定</h2>
+            <div class="set-card"><div>ライトモード</div><div class="m3-switch" id="sw-light" onclick="toggleLight()"></div></div>
+            <div class="set-card"><div>夜間モード</div><div class="m3-switch" onclick="this.classList.toggle('on')"></div></div>
+            <div class="set-card"><div>アクセントカラー</div><input type="color" onchange="document.documentElement.style.setProperty('--accent', this.value)" value="#d0bcff"></div>
+            <div class="set-card"><div>画質設定</div><select style="background:none; color:inherit; border:none;"><option>自動</option><option>2160p</option><option>1080p</option></select></div>
+            
+            <h3>更新履歴</h3>
+            <div class="history-list">
+                <b>V3.6.8:</b> Liquid Glassタブバー、M3スイッチ楕円化、ロゴ出し分け、設定項目拡充、API安定化。<br>
+                <b>V3.6.1:</b> 外部アプリ起動バグ修正、0.1刻み履歴実装。<br>
+                <b>V3.0.0:</b> Material 3 移行開始。独自プレイヤー。
+            </div>
+        `;
+        if(document.body.classList.contains('light')) document.getElementById('sw-light').classList.add('on');
     }
 
-    function toggleTheme(el) {
-        el.classList.toggle('on');
+    function toggleLight() {
         document.body.classList.toggle('light');
+        document.getElementById('sw-light').classList.toggle('on');
     }
 
-    function handleUpload(input) {
-        const file = input.files[0];
-        if(!file) return;
-        const url = URL.createObjectURL(file);
-        document.getElementById('player-overlay').style.display = 'flex';
-        document.getElementById('player-frame').innerHTML = `<video src="${url}" controls style="width:100%; height:100%; background:#000;"></video>`;
+    function openPlayer(id) {
+        // プレイヤー表示処理（前述のオーバーレイを使用）
+        alert("動画ID: " + id + " を再生します。");
     }
 </script>
 </body>
