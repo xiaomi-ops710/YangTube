@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>YangTube V3.6.6</title>
+    <title>YangTube V3.7.5</title>
     <link rel="icon" href="icon.png">
     <link rel="apple-touch-icon" href="icon.png">
     <link rel="manifest" href="manifest.json">
@@ -11,50 +11,50 @@
     <style>
         :root {
             --m3-primary: #d0bcff; --m3-on-primary: #381e72; --bg: #000; --surf: #1c1b1f; --text: #fff; --card: #111;
-            --m3-outline: #938f99;
+            --m3-outline: #938f99; --m3-surf-container: #2b2930;
         }
         body.light {
             --bg: #fef7ff; --surf: #f3edf7; --text: #1c1b1f; --m3-primary: #6750a4; --card: #fff;
-            --m3-outline: #79747e;
+            --m3-outline: #79747e; --m3-surf-container: #eaddff;
         }
-        body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Roboto', sans-serif; overflow: hidden; transition: all 0.3s cubic-bezier(0.2, 0, 0, 1); }
+        body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Roboto', sans-serif; overflow: hidden; transition: 0.3s cubic-bezier(0.2, 0, 0, 1); }
         
-        /* ヘッダー */
         header { position: fixed; top: 0; width: 100%; height: 65px; background: var(--bg); display: flex; align-items: center; padding: 0 12px; z-index: 1000; gap: 8px; box-sizing: border-box; }
         .logo { height: 32px; cursor: pointer; flex-shrink: 0; }
         .search-box { flex: 1; height: 40px; background: var(--surf); border-radius: 20px; display: flex; align-items: center; padding: 0 12px; }
         .search-box input { background: none; border: none; color: var(--text); flex: 1; outline: none; font-size: 14px; }
         
-        /* カテゴリ & 更新ボタン */
-        .cats-wrapper { position: fixed; top: 65px; width: 100%; height: 50px; display: flex; align-items: center; background: var(--bg); z-index: 999; padding: 0 12px; gap: 8px; box-sizing: border-box; }
+        .cats-wrapper { position: fixed; top: 65px; width: 100%; height: 50px; display: flex; align-items: center; background: var(--bg); z-index: 999; padding: 0 12px; gap: 8px; box-sizing: border-box; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .refresh-btn { width: 40px; height: 40px; border-radius: 50%; background: var(--surf); display: flex; align-items: center; justify-content: center; cursor: pointer; border: none; color: var(--text); }
         .cats { display: flex; overflow-x: auto; gap: 8px; flex: 1; scrollbar-width: none; }
         .cats::-webkit-scrollbar { display: none; }
-        .chip { padding: 6px 16px; background: var(--surf); border-radius: 20px; white-space: nowrap; cursor: pointer; border: none; color: var(--text); font-size: 14px; font-weight: 500; }
-        .chip.active { background: var(--m3-primary); color: var(--m3-on-primary); }
+        .chip { padding: 6px 16px; background: var(--surf); border-radius: 20px; white-space: nowrap; cursor: pointer; border: none; color: var(--text); font-size: 14px; }
+        .chip.active { background: var(--m3-primary); color: var(--m3-on-primary); font-weight: bold; }
 
-        /* メイン */
-        main { margin-top: 115px; height: calc(100vh - 190px); overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; padding: 16px; }
-        .v-card { cursor: pointer; }
+        main { margin-top: 115px; height: calc(100vh - 195px); overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; padding: 16px; }
+        .v-card { cursor: pointer; transition: 0.2s; }
         .thumb { width: 100%; aspect-ratio: 16/9; border-radius: 12px; object-fit: cover; background: #222; }
         .meta { display: flex; gap: 12px; margin-top: 10px; }
-        .ch-img { width: 36px; height: 36px; border-radius: 50%; background: #333; flex-shrink: 0; }
+        .ch-img { width: 36px; height: 36px; border-radius: 50%; background: #333; flex-shrink: 0; background-size: cover; }
         
-        /* M3 Switch */
         .m3-switch { position: relative; width: 52px; height: 32px; border: 2px solid var(--m3-outline); border-radius: 16px; cursor: pointer; transition: 0.2s; background: var(--surf); }
         .m3-switch.on { background: var(--m3-primary); border-color: var(--m3-primary); }
         .m3-switch::after { content: ""; position: absolute; top: 4px; left: 4px; width: 20px; height: 20px; background: var(--m3-outline); border-radius: 50%; transition: 0.2s; }
         .m3-switch.on::after { left: 24px; background: var(--m3-on-primary); width: 24px; height: 24px; top: 2px; }
 
-        /* ナビゲーション */
-        nav { position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%); height: 80px; background: var(--surf); border-radius: 40px; display: flex; align-items: center; padding: 0 12px; gap: 4px; z-index: 2000; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
-        .nav-item { width: 65px; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; color: var(--text); opacity: 0.6; }
+        nav { position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%); height: 80px; background: var(--surf); border-radius: 40px; display: flex; align-items: center; padding: 0 12px; gap: 4px; z-index: 2000; box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
+        .nav-item { width: 65px; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; color: var(--text); opacity: 0.5; }
         .nav-item.active { opacity: 1; color: var(--m3-primary); }
-        .nav-item.active .material-symbols-rounded { font-variation-settings: 'FILL' 1; }
-        .nav-item p { font-size: 11px; margin: 0; font-weight: 500; }
+        .nav-item p { font-size: 10px; margin: 4px 0 0 0; }
         .fab { width: 56px; height: 56px; background: var(--m3-primary); border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 8px; color: var(--m3-on-primary); }
 
+        /* API Key Input Styling */
+        .key-input-area { background: var(--m3-surf-container); padding: 16px; border-radius: 16px; margin-top: 12px; }
+        .key-field { width: 100%; background: var(--surf); border: 1px solid var(--m3-outline); color: var(--text); padding: 10px; border-radius: 8px; margin: 8px 0; outline: none; }
+        .save-btn { background: var(--m3-primary); color: var(--m3-on-primary); border: none; padding: 8px 16px; border-radius: 20px; font-weight: bold; cursor: pointer; }
+
         #player-overlay { position: fixed; inset: 0; background: var(--bg); z-index: 5000; display: none; flex-direction: column; }
+        .history-card { background: var(--m3-surf-container); padding: 12px; border-radius: 12px; margin-bottom: 8px; font-size: 13px; }
     </style>
 </head>
 <body class="dark">
@@ -62,8 +62,8 @@
 <header>
     <img src="icon.png" class="logo" onclick="tab('home')" alt="YangTube">
     <div class="search-box">
-        <input type="text" id="search-input" placeholder="検索" onkeypress="if(event.key==='Enter') doSearch()">
-        <span class="material-symbols-rounded" onclick="doSearch()">search</span>
+        <input type="text" id="search-input" placeholder="YouTubeを検索" onkeypress="if(event.key==='Enter') doSearch()">
+        <span class="material-symbols-rounded" style="cursor:pointer" onclick="doSearch()">search</span>
     </div>
 </header>
 
@@ -73,18 +73,15 @@
         <button class="chip active" onclick="setCat('すべて', this)">すべて</button>
         <button class="chip" onclick="setCat('Minecraft', this)">Minecraft</button>
         <button class="chip" onclick="setCat('にゃんこ大戦争', this)">にゃんこ大戦争</button>
-        <button class="chip" onclick="setCat('ガジェット', this)">ガジェット</button>
         <button class="chip" onclick="setCat('Pixel 10', this)">Pixel 10</button>
-        <button class="chip" onclick="setCat('PC自作', this)">PC自作</button>
+        <button class="chip" onclick="setCat('NucBox M7', this)">NucBox M7</button>
         <button class="chip" onclick="setCat('アニメ', this)">アニメ</button>
-        <button class="chip" onclick="setCat('音楽', this)">音楽</button>
-        <button class="chip" onclick="setCat('プログラミング', this)">開発</button>
     </div>
 </div>
 
 <main id="main-view"></main>
 
-<nav id="bottom-nav">
+<nav>
     <div class="nav-item active" id="nav-home" onclick="tab('home')"><span class="material-symbols-rounded">home</span><p>ホーム</p></div>
     <div class="nav-item" id="nav-search" onclick="tab('search')"><span class="material-symbols-rounded">explore</span><p>探索</p></div>
     <div class="fab" onclick="document.getElementById('file-input').click()"><span class="material-symbols-rounded">add</span></div>
@@ -96,17 +93,20 @@
 
 <div id="player-overlay">
     <div style="height:56px; display:flex; align-items:center; padding:0 16px;" onclick="closePlayer()">
-        <span class="material-symbols-rounded">expand_more</span>
+        <span class="material-symbols-rounded" style="cursor:pointer">expand_more</span>
     </div>
     <div id="player-frame" style="flex:1"></div>
 </div>
 
 <script>
-    // 画像（image_15）に合わせた変数名
-    const API_KEY = 'AIzaSyCsAe_J968Z05UXBbqHHhI7iVSZMnjyTdo'; 
     let currentCategory = 'すべて';
+    // localStorageからキーを読み込む。なければ空。
+    let API_KEY = localStorage.getItem('yt_api_key') || '';
 
-    window.onload = () => fetchHome();
+    window.onload = () => {
+        if(API_KEY) fetchHome();
+        else tab('sets'); // キーがなければ設定画面へ誘導
+    };
 
     async function tab(target) {
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -119,22 +119,30 @@
         if(target === 'home') {
             catsArea.style.display = 'flex';
             view.style.marginTop = '115px';
-            fetchHome();
+            if(API_KEY) fetchHome();
+            else view.innerHTML = '<p style="text-align:center; padding-top:40px;">設定からAPIキーを入力してください</p>';
         } else {
             catsArea.style.display = 'none';
             view.style.marginTop = '65px';
             if(target === 'sets') renderSettings();
             else if(target === 'subs') renderSubs();
-            else view.innerHTML = '<p style="text-align:center; opacity:0.5; margin-top:40px;">検索バーから動画を探してください</p>';
+            else view.innerHTML = '<p style="text-align:center; opacity:0.5; margin-top:40px;">探索タブ</p>';
         }
     }
 
-    async function fetchHome() {
+    async function callAPI(url) {
+        if(!API_KEY) return { error: true, message: "APIキーが設定されていません。" };
         try {
-            const res = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet&chart=mostPopular&regionCode=JP&maxResults=30&key=${API_KEY}`);
+            const res = await fetch(url);
             const data = await res.json();
-            render(data.items);
-        } catch (e) { console.error(e); }
+            if(data.error) return { error: true, message: data.error.message };
+            return { error: false, data: data.items };
+        } catch (e) { return { error: true, message: "通信エラー" }; }
+    }
+
+    async function fetchHome() {
+        const result = await callAPI(`https://www.googleapis.com/youtube/v3/videos?part=snippet&chart=mostPopular&regionCode=JP&maxResults=30&key=${API_KEY}`);
+        render(result);
     }
 
     async function doSearch() {
@@ -142,9 +150,8 @@
         if(!q) return;
         tab('search');
         document.getElementById('main-view').innerHTML = '<p style="text-align:center;">検索中...</p>';
-        const res = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(q)}&maxResults=30&type=video&key=${API_KEY}`);
-        const data = await res.json();
-        render(data.items);
+        const result = await callAPI(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(q)}&maxResults=30&type=video&key=${API_KEY}`);
+        render(result);
     }
 
     async function setCat(q, btn) {
@@ -156,29 +163,28 @@
 
     async function refreshContent() {
         const v = document.getElementById('main-view');
-        v.innerHTML = '<p style="text-align:center;">読み込み中...</p>';
+        v.innerHTML = '<p style="text-align:center;">更新中...</p>';
         const q = currentCategory === 'すべて' ? '最新トレンド' : currentCategory;
-        const res = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(q)}&maxResults=30&type=video&key=${API_KEY}`);
-        const data = await res.json();
-        render(data.items);
+        const result = await callAPI(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(q)}&maxResults=30&type=video&key=${API_KEY}`);
+        render(result);
     }
 
-    function render(items) {
+    function render(result) {
         const v = document.getElementById('main-view');
-        if(!items || items.length === 0) {
-            v.innerHTML = '<p style="text-align:center;">動画が見つかりませんでした。APIキーを確認してください。</p>';
+        if(result.error) {
+            v.innerHTML = `<div style="padding:20px; color:#ffb4ab;">${result.message}</div>`;
             return;
         }
-        v.innerHTML = items.map(i => {
+        v.innerHTML = result.data.map(i => {
             const id = i.id.videoId || i.id;
             const s = i.snippet;
             return `
             <div class="v-card" onclick="openPlayer('${id}')">
                 <img src="${s.thumbnails.high.url}" class="thumb">
                 <div class="meta">
-                    <div class="ch-img" style="background-image:url('https://ui-avatars.com/api/?name=${s.channelTitle}'); background-size:cover;"></div>
+                    <div class="ch-img" style="background-image:url('https://ui-avatars.com/api/?name=${encodeURIComponent(s.channelTitle)}')"></div>
                     <div>
-                        <div style="font-weight:bold; font-size:14px; line-height:1.4; display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${s.title}</div>
+                        <div style="font-weight:bold; font-size:14px; line-height:1.4;">${s.title}</div>
                         <div style="font-size:12px; color:gray; margin-top:4px;">${s.channelTitle}</div>
                     </div>
                 </div>
@@ -201,37 +207,43 @@
         if(!file) return;
         const url = URL.createObjectURL(file);
         document.getElementById('player-overlay').style.display = 'flex';
-        document.getElementById('player-frame').innerHTML = `
-            <div style="padding:20px; background:#000; height:100%; display:flex; flex-direction:column; align-items:center;">
-                <h3 style="color:#fff;">作成プレビュー</h3>
-                <video src="${url}" controls style="max-width:100%; max-height:80%; border-radius:12px;"></video>
-                <p style="color:gray; margin-top:20px;">※この動画はサーバーにはアップロードされません（プレビューのみ）</p>
-            </div>`;
+        document.getElementById('player-frame').innerHTML = `<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%;"><video src="${url}" controls style="max-width:90%; max-height:70%; border-radius:12px;"></video><h3 style="margin-top:20px;">作成プレビュー</h3></div>`;
     }
 
     function renderSubs() {
-        document.getElementById('main-view').innerHTML = `
-            <div style="padding:40px; text-align:center;">
-                <span class="material-symbols-rounded" style="font-size:64px; opacity:0.3;">auto_awesome</span>
-                <h3>登録済みチャンネル</h3>
-                <p style="color:gray;">現在、このデバイスから登録されたチャンネルはありません。</p>
-            </div>`;
+        document.getElementById('main-view').innerHTML = `<div style="padding:40px; text-align:center;"><span class="material-symbols-rounded" style="font-size:64px; opacity:0.2;">subscriptions</span><h3>登録済み</h3><p style="color:gray;">近日実装</p></div>`;
     }
 
     function renderSettings() {
         const isLight = document.body.classList.contains('light');
         document.getElementById('main-view').innerHTML = `
             <div style="padding:20px;">
-                <h2 style="margin-bottom:24px;">設定</h2>
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+                <h2>設定</h2>
+                <div class="key-input-area">
+                    <p style="font-size:14px; margin-bottom:8px;">YouTube API Key</p>
+                    <input type="password" id="key-field" class="key-field" placeholder="AIza..." value="${API_KEY}">
+                    <button class="save-btn" onclick="saveKey()">キーを保存</button>
+                    <p style="font-size:11px; color:gray; margin-top:10px;">※キーはこのデバイスのブラウザにのみ保存されます。</p>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:32px;">
                     <div>ライトテーマ</div>
                     <div class="m3-switch ${isLight?'on':''}" onclick="toggleTheme(this)"></div>
                 </div>
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
-                    <div>アクセントカラー（自動）</div>
-                    <div class="m3-switch on"></div>
-                </div>
+                
+                <h3 style="margin-top:32px;">更新履歴</h3>
+                <div class="history-card"><strong>V3.7.5</strong>: アプリ内APIキー設定機能。</div>
+                <div class="history-card"><strong>V3.7.0</strong>: 全機能統合・API診断機能。</div>
             </div>`;
+    }
+
+    function saveKey() {
+        const val = document.getElementById('key-field').value;
+        if(!val) { alert('キーを入力してください'); return; }
+        localStorage.setItem('yt_api_key', val);
+        API_KEY = val;
+        alert('APIキーを保存しました。ホームに戻ります。');
+        tab('home');
     }
 
     function toggleTheme(el) {
