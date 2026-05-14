@@ -3,208 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>YangTube V4.1.0</title>
+    <title>YangTube - Maintenance</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <style>
-        :root { --m3-primary: #d0bcff; --m3-on-primary: #381e72; --bg: #000; --surf: #1c1b1f; --text: #fff; --m3-outline: #938f99; --m3-surf-container: #2b2930; }
-        body.light { --bg: #fef7ff; --surf: #f3edf7; --text: #1c1b1f; --m3-primary: #6750a4; --m3-surf-container: #eaddff; }
-        body.night { --bg: #000; --surf: #000; --m3-primary: #ffb4ab; } /* 夜間モード */
-        body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Roboto', sans-serif; overflow: hidden; transition: 0.3s; }
+        :root { --m3-primary: #d0bcff; --m3-on-primary: #381e72; --bg: #000; --surf: #1c1b1f; --text: #fff; --m3-surf-container: #2b2930; }
+        body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Roboto', sans-serif; overflow: hidden; }
 
-        /* 1. ロゴの大型化修正 */
-        header { position: fixed; top: 0; width: 100%; height: 70px; background: var(--bg); display: flex; align-items: center; padding: 0 16px; z-index: 1000; gap: 16px; box-sizing: border-box; }
-        .logo { height: 48px; aspect-ratio: 16/9; cursor: pointer; object-fit: contain; }
-        .search-box { flex: 1; max-width: 600px; height: 44px; background: var(--surf); border-radius: 22px; display: flex; align-items: center; padding: 0 16px; }
-        .search-box input { background: none; border: none; color: var(--text); flex: 1; outline: none; font-size: 16px; }
+        /* 起動アニメーション（維持） */
+        #boot-loader { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.8s; }
+        .boot-logo { width: 160px; aspect-ratio: 16/9; margin-bottom: 24px; animation: pulse 2s infinite; }
+        .progress-bar { width: 200px; height: 4px; background: var(--surf); border-radius: 2px; overflow: hidden; }
+        .progress-fill { width: 0%; height: 100%; background: var(--m3-primary); animation: load 1.5s forwards; }
+        @keyframes load { to { width: 100%; } }
+        @keyframes pulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
 
-        /* カテゴリチップ増量 */
-        .cats-wrapper { position: fixed; top: 70px; width: 100%; height: 50px; display: flex; align-items: center; background: var(--bg); z-index: 999; padding: 0 12px; gap: 8px; box-sizing: border-box; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .refresh-btn { width: 40px; height: 40px; border-radius: 50%; background: var(--surf); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text); border: none; }
-        .cats { display: flex; overflow-x: auto; gap: 8px; flex: 1; scrollbar-width: none; }
-        .cats::-webkit-scrollbar { display: none; }
-        .chip { padding: 6px 16px; background: var(--surf); border-radius: 20px; white-space: nowrap; cursor: pointer; border: none; color: var(--text); font-size: 14px; }
-        .chip.active { background: var(--m3-primary); color: var(--m3-on-primary); font-weight: bold; }
+        /* ヘッダー（ロゴ維持、検索無効化） */
+        header { position: fixed; top: 0; width: 100%; height: 70px; background: var(--bg); display: flex; align-items: center; padding: 0 16px; z-index: 1000; box-sizing: border-box; }
+        .logo { height: 48px; aspect-ratio: 16/9; object-fit: contain; }
 
-        main { margin-top: 120px; height: calc(100vh - 200px); overflow-y: auto; padding: 16px; display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
-        .v-card { cursor: pointer; }
-        .thumb { width: 100%; aspect-ratio: 16/9; border-radius: 12px; object-fit: cover; background: #222; }
-        .ch-icon { width: 40px; height: 40px; border-radius: 50%; background: #333; cursor: pointer; transition: 0.2s; }
-        .ch-icon:hover { transform: scale(1.1); border: 2px solid var(--m3-primary); }
+        /* メンテナンス画面のスタイル */
+        main { margin-top: 70px; height: calc(100vh - 145px); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; }
+        .mnt-icon { font-size: 80px; color: var(--m3-primary); margin-bottom: 20px; animation: rotate 4s linear infinite; }
+        .mnt-title { font-size: 22px; font-weight: bold; margin-bottom: 10px; }
+        .mnt-text { font-size: 14px; opacity: 0.7; line-height: 1.6; }
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        nav { position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%); height: 75px; background: var(--surf); border-radius: 38px; display: flex; align-items: center; padding: 0 10px; gap: 5px; z-index: 2000; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
-        .nav-item { width: 60px; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; opacity: 0.6; }
-        .nav-item.active { opacity: 1; color: var(--m3-primary); }
-        .fab { width: 56px; height: 56px; background: var(--m3-primary); border-radius: 16px; display: flex; align-items: center; justify-content: center; color: var(--m3-on-primary); }
-        
-        #player-overlay { position: fixed; inset: 0; background: var(--bg); z-index: 5000; display: none; flex-direction: column; }
-        .history-card { background: var(--m3-surf-container); padding: 12px; border-radius: 12px; margin-bottom: 8px; font-size: 13px; }
+        /* ナビゲーションバー（維持） */
+        nav { position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%); height: 75px; background: var(--surf); border-radius: 38px; display: flex; align-items: center; padding: 0 10px; gap: 5px; z-index: 2000; box-shadow: 0 10px 40px rgba(0,0,0,0.5); opacity: 0.8; }
+        .nav-item { width: 60px; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: not-allowed; }
+        .fab { width: 56px; height: 56px; background: var(--m3-surf-container); border-radius: 16px; display: flex; align-items: center; justify-content: center; color: var(--m3-outline); }
     </style>
 </head>
-<body class="dark">
+<body>
+
+<div id="boot-loader">
+    <img src="logo.png" class="boot-logo" onerror="this.src='https://placehold.jp/381e72/d0bcff/160x90.png?text=YangTube'">
+    <div class="progress-bar"><div class="progress-fill"></div></div>
+</div>
 
 <header>
-    <img src="logo.png" class="logo" onclick="tab('home')" onerror="this.src='https://placehold.jp/381e72/d0bcff/160x90.png?text=Logo'">
-    <div class="search-box">
-        <input type="text" id="search-input" placeholder="YangTube 検索" onkeypress="if(event.key==='Enter') doSearch()">
-        <span class="material-symbols-rounded" style="cursor:pointer" onclick="doSearch()">search</span>
-    </div>
+    <img src="logo.png" class="logo" onerror="this.src='https://placehold.jp/381e72/d0bcff/160x90.png?text=Logo'">
 </header>
 
-<div class="cats-wrapper" id="cats-area">
-    <button class="refresh-btn" onclick="fetchHome()"><span class="material-symbols-rounded">refresh</span></button>
-    <div class="cats" id="cat-chips">
-        <!-- JSで生成 -->
+<main>
+    <span class="material-symbols-rounded mnt-icon">build</span>
+    <div class="mnt-title">ただいまメンテナンス中です</div>
+    <div class="mnt-text">
+        大規模アップデートの準備をしています。<br>
+        GASとFirebaseへの移行、および広告検知システムの<br>
+        構築を行っております。もうしばらくお待ちください。
     </div>
-</div>
-
-<main id="main-view"></main>
+</main>
 
 <nav>
-    <div class="nav-item active" id="nav-home" onclick="tab('home')"><span class="material-symbols-rounded">home</span></div>
-    <div class="nav-item" id="nav-search" onclick="tab('search')"><span class="material-symbols-rounded">search</span></div>
-    <div class="fab" onclick="document.getElementById('file-input').click()"><span class="material-symbols-rounded">add</span></div>
-    <div class="nav-item" id="nav-subs" onclick="tab('subs')"><span class="material-symbols-rounded">subscriptions</span></div>
-    <div class="nav-item" id="nav-sets" onclick="tab('sets')"><span class="material-symbols-rounded">settings</span></div>
+    <div class="nav-item"><span class="material-symbols-rounded" style="color:var(--m3-primary)">home</span></div>
+    <div class="nav-item"><span class="material-symbols-rounded">search</span></div>
+    <div class="fab"><span class="material-symbols-rounded">construction</span></div>
+    <div class="nav-item"><span class="material-symbols-rounded">subscriptions</span></div>
+    <div class="nav-item"><span class="material-symbols-rounded">settings</span></div>
 </nav>
 
-<input type="file" id="file-input" hidden onchange="handleUpload(this)">
-
-<div id="player-overlay">
-    <div style="height:56px; display:flex; align-items:center; padding:0 16px;" onclick="closePlayer()">
-        <span class="material-symbols-rounded">expand_more</span>
-    </div>
-    <div id="player-frame" style="flex:1"></div>
-</div>
-
 <script>
-    // 2. APIキーをコードに入力
-    const API_KEY = 'AIzaSyDHmPXH8L1Nsek8Qul8xoiPJUBts-JLiSE'; 
-    let currentCategory = 'すべて';
-    const categories = ['すべて', 'Minecraft', 'にゃんこ大戦争', 'Pixel 10', 'NucBox M7', 'カスタムROM', 'アニメ', 'プログラミング', '音楽'];
-
     window.onload = () => {
-        renderChips();
-        fetchHome();
+        // 起動アニメーションを1.5秒表示してから消す
+        setTimeout(() => {
+            const loader = document.getElementById('boot-loader');
+            loader.style.opacity = '0';
+            setTimeout(() => loader.remove(), 800);
+        }, 1500);
     };
-
-    function renderChips() {
-        const area = document.getElementById('cat-chips');
-        area.innerHTML = categories.map(c => `<button class="chip ${currentCategory===c?'active':''}" onclick="setCat('${c}', this)">${c}</button>`).join('');
-    }
-
-    async function setCat(q, btn) {
-        currentCategory = q;
-        renderChips();
-        const query = q === 'すべて' ? '最新トレンド' : q;
-        const data = await callAPI(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&maxResults=20&type=video&key=${API_KEY}`);
-        renderVideos(data.items);
-    }
-
-    // 3. チャンネル独自UIの実装
-    async function openChannel(chId, chTitle) {
-        const view = document.getElementById('main-view');
-        document.getElementById('cats-area').style.display = 'none';
-        view.style.marginTop = '75px';
-        view.innerHTML = `
-            <div style="grid-column: 1/-1; padding:20px; background:var(--m3-surf-container); border-radius:20px; margin-bottom:20px;">
-                <h2>${chTitle}</h2>
-                <div style="display:flex; gap:10px;">
-                    <button class="chip active" onclick="fetchChVideos('${chId}', 'date')">新しい順</button>
-                    <button class="chip" onclick="fetchChVideos('${chId}', 'viewCount')">人気順</button>
-                    <button class="chip" onclick="alert('旧着順はAPI制限により日付順の逆転表示になります')">古い順</button>
-                </div>
-            </div>
-            <div id="ch-video-grid" style="display:contents"></div>
-        `;
-        fetchChVideos(chId, 'date');
-    }
-
-    async function fetchChVideos(chId, order) {
-        const data = await callAPI(`https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${chId}&order=${order}&maxResults=20&type=video&key=${API_KEY}`);
-        const grid = document.getElementById('ch-video-grid') || document.getElementById('main-view');
-        renderVideos(data.items, grid);
-    }
-
-    function renderVideos(items, target) {
-        const v = target || document.getElementById('main-view');
-        if(!items) { v.innerHTML = "動画が見つかりませんでした"; return; }
-        v.innerHTML = items.map(i => {
-            const id = i.id.videoId || i.id;
-            const s = i.snippet;
-            return `
-                <div class="v-card">
-                    <img src="${s.thumbnails.high.url}" class="thumb" onclick="openPlayer('${id}')">
-                    <div style="padding:10px; display:flex; gap:12px;">
-                        <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(s.channelTitle)}&background=random" class="ch-icon" onclick="openChannel('${s.channelId}', '${s.channelTitle}')">
-                        <div onclick="openPlayer('${id}')">
-                            <div style="font-weight:bold; font-size:14px; line-height:1.4;">${s.title}</div>
-                            <div style="font-size:12px; color:gray; margin-top:4px;">${s.channelTitle}</div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }).join('');
-    }
-
-    // 4. 設定項目の大幅復活
-    function renderSettings() {
-        const v = document.getElementById('main-view');
-        v.innerHTML = `
-            <div style="padding:10px;">
-                <h2>設定</h2>
-                <div class="history-card">
-                    <b>テーマ設定</b>
-                    <div style="display:flex; gap:10px; margin-top:10px;">
-                        <button class="chip" onclick="document.body.className='dark'">ダーク</button>
-                        <button class="chip" onclick="document.body.className='light'">ライト</button>
-                        <button class="chip" onclick="document.body.className='night'">夜間</button>
-                    </div>
-                </div>
-                <div class="history-card">
-                    <b>アクセントカラー</b>
-                    <div style="display:flex; gap:10px; margin-top:10px;">
-                        <div style="width:30px; height:30px; background:#d0bcff; border-radius:50%;" onclick="document.documentElement.style.setProperty('--m3-primary','#d0bcff')"></div>
-                        <div style="width:30px; height:30px; background:#ffb4ab; border-radius:50%;" onclick="document.documentElement.style.setProperty('--m3-primary','#ffb4ab')"></div>
-                        <div style="width:30px; height:30px; background:#b2f0ff; border-radius:50%;" onclick="document.documentElement.style.setProperty('--m3-primary','#b2f0ff')"></div>
-                    </div>
-                </div>
-                <h3 style="margin-top:20px;">更新履歴</h3>
-                <div class="history-card"><b>V4.1.0</b>: APIキーを内部コード化。ロゴの大型化。チャンネルUIと並べ替え機能を実装。設定項目（テーマ・カラー）の復活。</div>
-                <div class="history-card"><b>V4.0.0</b>: 起動アニメーションと登録済み機能の実装。</div>
-                <div class="history-card"><b>V3.7.5</b>: Material Youデザインのブラッシュアップ。</div>
-            </div>
-        `;
-    }
-
-    // 基本ロジック（維持）
-    async function callAPI(url) {
-        const res = await fetch(url);
-        return await res.json();
-    }
-    async function fetchHome() {
-        tab('home');
-        const data = await callAPI(`https://www.googleapis.com/youtube/v3/videos?part=snippet&chart=mostPopular&regionCode=JP&maxResults=20&key=${API_KEY}`);
-        renderVideos(data.items);
-    }
-    async function doSearch() {
-        const q = document.getElementById('search-input').value;
-        const data = await callAPI(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${q}&maxResults=25&type=video&key=${API_KEY}`);
-        renderVideos(data.items);
-    }
-    function tab(name) {
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        document.getElementById('nav-'+name).classList.add('active');
-        const cats = document.getElementById('cats-area');
-        const view = document.getElementById('main-view');
-        if(name === 'home') { cats.style.display = 'flex'; view.style.marginTop = '120px'; }
-        else { cats.style.display = 'none'; view.style.marginTop = '75px'; }
-        if(name === 'sets') renderSettings();
-    }
-    function openPlayer(id) {
-        document.getElementById('player-overlay').style.display = 'flex';
-        document.getElementById('player-frame').innerHTML = `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1" style="width:100%; height:100%; border:none;" allow="autoplay; fullscreen"></iframe>`;
-    }
-    function closePlayer() { document.getElementById('player-overlay').style.display = 'none'; document.getElementById('player-frame').innerHTML = ''; }
 </script>
+
 </body>
 </html>
