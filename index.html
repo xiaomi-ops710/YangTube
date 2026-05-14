@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>YangTube - Dev & Maintenance</title>
+    <title>YangTube - Alpha</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <style>
         :root { --m3-primary: #d0bcff; --m3-on-primary: #381e72; --bg: #000; --surf: #1c1b1f; --text: #fff; --m3-surf-container: #2b2930; --m3-outline: #938f99; }
@@ -13,30 +13,28 @@
         header { position: fixed; top: 0; width: 100%; height: 70px; background: var(--bg); display: flex; align-items: center; padding: 0 16px; z-index: 1000; }
         .logo { height: 48px; aspect-ratio: 16/9; object-fit: contain; }
 
-        /* メイン（メンテナンス表示） */
+        /* メイン（メンテナンス） */
         main { margin-top: 70px; height: calc(100vh - 145px); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; }
-        .mnt-icon { font-size: 80px; color: var(--m3-primary); margin-bottom: 20px; animation: rotate 4s linear infinite; }
-        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .mnt-icon { font-size: 80px; color: var(--m3-primary); margin-bottom: 20px; }
 
-        /* フィードバック用ボトムシート */
+        /* フィードバックシート */
         #feedback-sheet { position: fixed; bottom: -100%; left: 0; width: 100%; background: var(--m3-surf-container); border-radius: 28px 28px 0 0; z-index: 4000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); padding: 24px; box-sizing: border-box; }
         #feedback-sheet.open { bottom: 0; }
-        .sheet-handle { width: 32px; height: 4px; background: var(--m3-outline); border-radius: 2px; margin: 0 auto 16px; }
-        textarea { width: 100%; background: var(--surf); border: 1px solid var(--m3-outline); color: #fff; border-radius: 12px; padding: 12px; height: 100px; resize: none; box-sizing: border-box; margin-bottom: 16px; }
+        textarea { width: 100%; background: var(--surf); border: 1px solid var(--m3-outline); color: #fff; border-radius: 12px; padding: 12px; height: 100px; resize: none; margin-bottom: 16px; }
 
-        /* 開発者専用パネル (URL: ?admin=dev2633) */
-        #admin-panel { position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 5000; display: none; flex-direction: column; padding: 24px; overflow-y: auto; }
-        .admin-card { background: var(--m3-surf-container); padding: 16px; border-radius: 16px; margin-bottom: 16px; border: 1px solid #49454f; }
-        .report-item { background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; margin-top: 8px; font-size: 13px; border-left: 4px solid var(--m3-primary); }
-
-        /* 共通ボタン */
-        .btn { border: none; padding: 12px 24px; border-radius: 20px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .btn-primary { background: var(--m3-primary); color: var(--m3-on-primary); }
-        .btn-text { background: none; color: var(--m3-primary); }
+        /* 開発者専用パネル (管理者のみ) */
+        #admin-panel { position: fixed; inset: 0; background: #000; z-index: 5000; display: none; flex-direction: column; padding: 20px; overflow-y: auto; }
+        .admin-card { background: var(--m3-surf-container); padding: 16px; border-radius: 16px; margin-bottom: 16px; }
+        
+        /* 簡易エディタ */
+        #code-editor { width: 100%; height: 300px; background: #111; color: #0f0; font-family: monospace; font-size: 12px; border: 1px solid #444; border-radius: 8px; padding: 10px; margin-top: 10px; white-space: pre; overflow: scroll; }
 
         /* ナビバー */
-        nav { position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%); height: 75px; background: var(--surf); border-radius: 38px; display: flex; align-items: center; padding: 0 10px; z-index: 2000; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
-        .nav-item { width: 60px; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; }
+        nav { position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%); height: 75px; background: var(--surf); border-radius: 38px; display: flex; align-items: center; padding: 0 10px; z-index: 2000; }
+        .nav-item { width: 60px; height: 100%; display: flex; align-items: center; justify-content: center; }
+
+        .btn { border: none; padding: 10px 20px; border-radius: 20px; font-weight: bold; cursor: pointer; }
+        .btn-primary { background: var(--m3-primary); color: var(--m3-on-primary); }
     </style>
 </head>
 <body>
@@ -46,116 +44,90 @@
 </header>
 
 <main>
-    <span class="material-symbols-rounded mnt-icon">build</span>
-    <div style="font-size:22px; font-weight:bold; margin-bottom:10px;">大規模メンテナンス中</div>
-    <div style="font-size:14px; opacity:0.7; line-height:1.6;">
-        現在、YangTubeの脱GitHub・Firebase移行作業を<br>行っています。アップデートまで今しばらくお待ちください。
-    </div>
-    <button class="btn btn-text" style="margin-top:20px;" onclick="openFeedback()">
-        <span class="material-symbols-rounded" style="vertical-align:middle; margin-right:8px;">feedback</span>
-        バグ報告・フィードバックを送る
-    </button>
+    <span class="material-symbols-rounded mnt-icon">construction</span>
+    <h3>大規模メンテナンス中</h3>
+    <p style="font-size:14px; opacity:0.7;">より良い視聴体験のため、システムをアップデートしています。</p>
+    <button class="btn btn-primary" onclick="openFeedback()">フィードバックを送る</button>
 </main>
 
 <div id="feedback-sheet">
-    <div class="sheet-handle"></div>
-    <h3 style="margin:0 0 16px 0;">フィードバック送信</h3>
-    <textarea id="fb-text" placeholder="バグの報告や、新機能の要望を教えてください..."></textarea>
-    <div style="display:flex; justify-content:flex-end; gap:12px;">
-        <button class="btn btn-text" onclick="closeFeedback()">キャンセル</button>
-        <button class="btn btn-primary" onclick="sendFeedback()">送信する</button>
-    </div>
+    <h3>フィードバック送信</h3>
+    <textarea id="fb-text" placeholder="バグ報告などはこちら..."></textarea>
+    <button class="btn btn-primary" style="width:100%" onclick="sendFeedback()">送信</button>
+    <button class="btn" style="width:100%; color:#fff; margin-top:8px;" onclick="closeFeedback()">キャンセル</button>
 </div>
 
 <div id="admin-panel">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
-        <h2 style="margin:0; display:flex; align-items:center; gap:12px;">
-            <span class="material-symbols-rounded" style="color:var(--m3-primary)">terminal</span>
-            Dev Console
-        </h2>
-        <button onclick="closeAdmin()" style="background:none; border:none; color:#fff;"><span class="material-symbols-rounded">close</span></button>
-    </div>
-
+    <h2>Dev Console</h2>
     <div class="admin-card">
-        <b>📝 届いたフィードバック</b>
-        <div id="admin-reports-list">
-            <p style="opacity:0.5; font-size:13px;">報告はまだありません</p>
-        </div>
-        <button class="btn btn-text" style="width:100%; margin-top:10px;" onclick="clearReports()">報告をすべて消去</button>
+        <b>📝 届いた報告</b>
+        <div id="report-list" style="margin-top:10px; font-size:13px;"></div>
     </div>
-
+    
     <div class="admin-card">
-        <b>🚀 メンテナンス操作</b>
-        <div style="display:flex; gap:10px; margin-top:12px;">
-            <button class="btn btn-primary" onclick="alert('Firebase移行後に有効化されます')">メンテナンス解除</button>
-            <button class="btn btn-text" onclick="location.href='https://github.com/xiaomi-ops710/YangTube/edit/main/index.html'">GitHubで編集</button>
-        </div>
+        <b>💻 Index.html 編集 (簡易)</b>
+        <p style="font-size:11px; opacity:0.6;">現在の全コードを表示中。GitHubに貼り付ける際は「全コピー」してください。</p>
+        <textarea id="code-editor"></textarea>
+        <button class="btn btn-primary" style="width:100%; margin-top:10px;" onclick="copyCode()">全コードをコピーしてGitHubへ</button>
     </div>
+    
+    <button class="btn" style="color:#fff;" onclick="closeAdmin()">閉じる</button>
 </div>
 
-<nav>
-    <div class="nav-item" onclick="alert('現在メンテナンス中です')"><span class="material-symbols-rounded" style="color:var(--m3-primary)">home</span></div>
-    <div class="nav-item" onclick="openAdmin()"><span class="material-symbols-rounded">admin_panel_settings</span></div>
-    <div class="nav-item" onclick="openFeedback()"><span class="material-symbols-rounded">chat_bubble</span></div>
-</nav>
+<nav id="navbar">
+    <div class="nav-item"><span class="material-symbols-rounded" style="color:var(--m3-primary)">home</span></div>
+    </nav>
 
 <script>
-    // URLの admin=dev2633 を確認
     const urlParams = new URLSearchParams(window.location.search);
     const isAdmin = urlParams.get('admin') === 'dev2633';
 
-    // フィードバック開閉
+    window.onload = () => {
+        const nav = document.getElementById('navbar');
+        // 管理者の時だけアイコンを追加
+        if (isAdmin) {
+            const adminTab = document.createElement('div');
+            adminTab.className = 'nav-item';
+            adminTab.innerHTML = '<span class="material-symbols-rounded">terminal</span>';
+            adminTab.onclick = openAdmin;
+            nav.appendChild(adminTab);
+            
+            // エディタに現在のHTMLを流し込む
+            document.getElementById('code-editor').value = document.documentElement.outerHTML;
+            renderReports();
+        }
+    };
+
     function openFeedback() { document.getElementById('feedback-sheet').classList.add('open'); }
     function closeFeedback() { document.getElementById('feedback-sheet').classList.remove('open'); }
 
-    // フィードバック送信（一旦LocalStorageに保存）
     function sendFeedback() {
         const text = document.getElementById('fb-text').value;
         if(!text) return;
-        
         let reports = JSON.parse(localStorage.getItem('yt_reports') || '[]');
         reports.push({ text: text, date: new Date().toLocaleString() });
         localStorage.setItem('yt_reports', JSON.stringify(reports));
-        
-        alert('報告ありがとうございます！開発者へ送信されました。');
+        alert('送信しました！');
         document.getElementById('fb-text').value = '';
         closeFeedback();
     }
 
-    // 開発者パネル開閉
-    function openAdmin() {
-        if(isAdmin) {
-            renderReports();
-            document.getElementById('admin-panel').style.display = 'flex';
-        } else {
-            alert('開発者権限がありません。URLを確認してください。');
-        }
-    }
+    function openAdmin() { document.getElementById('admin-panel').style.display = 'flex'; renderReports(); }
     function closeAdmin() { document.getElementById('admin-panel').style.display = 'none'; }
 
-    // 報告内容の表示
     function renderReports() {
-        const list = document.getElementById('admin-reports-list');
         const reports = JSON.parse(localStorage.getItem('yt_reports') || '[]');
-        if(reports.length === 0) {
-            list.innerHTML = '<p style="opacity:0.5; font-size:13px;">報告はまだありません</p>';
-            return;
-        }
-        list.innerHTML = reports.map(r => `
-            <div class="report-item">
-                <div style="font-weight:bold;">${r.text}</div>
-                <div style="font-size:11px; opacity:0.6; margin-top:4px;">${r.date}</div>
-            </div>
-        `).reverse().join('');
+        const list = document.getElementById('report-list');
+        list.innerHTML = reports.length ? reports.map(r => `<div style="border-bottom:1px solid #444; padding:5px 0;">${r.text} <br><small>${r.date}</small></div>`).join('') : '報告なし';
     }
 
-    function clearReports() {
-        if(confirm('すべての報告を削除しますか？')) {
-            localStorage.removeItem('yt_reports');
-            renderReports();
-        }
+    function copyCode() {
+        const editor = document.getElementById('code-editor');
+        editor.select();
+        document.execCommand('copy');
+        alert('コードをコピーしました！GitHubの編集画面に貼り付けてください。');
+        location.href = 'https://github.com/xiaomi-ops710/YangTube/edit/main/index.html';
     }
 </script>
-
 </body>
 </html>
