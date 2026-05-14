@@ -3,75 +3,158 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>YangTube - Maintenance</title>
+    <title>YangTube - Dev & Maintenance</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <style>
-        :root { --m3-primary: #d0bcff; --m3-on-primary: #381e72; --bg: #000; --surf: #1c1b1f; --text: #fff; --m3-surf-container: #2b2930; }
+        :root { --m3-primary: #d0bcff; --m3-on-primary: #381e72; --bg: #000; --surf: #1c1b1f; --text: #fff; --m3-surf-container: #2b2930; --m3-outline: #938f99; }
         body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Roboto', sans-serif; overflow: hidden; }
 
-        /* 起動アニメーション（維持） */
-        #boot-loader { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.8s; }
-        .boot-logo { width: 160px; aspect-ratio: 16/9; margin-bottom: 24px; animation: pulse 2s infinite; }
-        .progress-bar { width: 200px; height: 4px; background: var(--surf); border-radius: 2px; overflow: hidden; }
-        .progress-fill { width: 0%; height: 100%; background: var(--m3-primary); animation: load 1.5s forwards; }
-        @keyframes load { to { width: 100%; } }
-        @keyframes pulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
-
-        /* ヘッダー（ロゴ維持、検索無効化） */
-        header { position: fixed; top: 0; width: 100%; height: 70px; background: var(--bg); display: flex; align-items: center; padding: 0 16px; z-index: 1000; box-sizing: border-box; }
+        /* ヘッダー */
+        header { position: fixed; top: 0; width: 100%; height: 70px; background: var(--bg); display: flex; align-items: center; padding: 0 16px; z-index: 1000; }
         .logo { height: 48px; aspect-ratio: 16/9; object-fit: contain; }
 
-        /* メンテナンス画面のスタイル */
+        /* メイン（メンテナンス表示） */
         main { margin-top: 70px; height: calc(100vh - 145px); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; }
         .mnt-icon { font-size: 80px; color: var(--m3-primary); margin-bottom: 20px; animation: rotate 4s linear infinite; }
-        .mnt-title { font-size: 22px; font-weight: bold; margin-bottom: 10px; }
-        .mnt-text { font-size: 14px; opacity: 0.7; line-height: 1.6; }
         @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        /* ナビゲーションバー（維持） */
-        nav { position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%); height: 75px; background: var(--surf); border-radius: 38px; display: flex; align-items: center; padding: 0 10px; gap: 5px; z-index: 2000; box-shadow: 0 10px 40px rgba(0,0,0,0.5); opacity: 0.8; }
-        .nav-item { width: 60px; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: not-allowed; }
-        .fab { width: 56px; height: 56px; background: var(--m3-surf-container); border-radius: 16px; display: flex; align-items: center; justify-content: center; color: var(--m3-outline); }
+        /* フィードバック用ボトムシート */
+        #feedback-sheet { position: fixed; bottom: -100%; left: 0; width: 100%; background: var(--m3-surf-container); border-radius: 28px 28px 0 0; z-index: 4000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); padding: 24px; box-sizing: border-box; }
+        #feedback-sheet.open { bottom: 0; }
+        .sheet-handle { width: 32px; height: 4px; background: var(--m3-outline); border-radius: 2px; margin: 0 auto 16px; }
+        textarea { width: 100%; background: var(--surf); border: 1px solid var(--m3-outline); color: #fff; border-radius: 12px; padding: 12px; height: 100px; resize: none; box-sizing: border-box; margin-bottom: 16px; }
+
+        /* 開発者専用パネル (URL: ?admin=dev2633) */
+        #admin-panel { position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 5000; display: none; flex-direction: column; padding: 24px; overflow-y: auto; }
+        .admin-card { background: var(--m3-surf-container); padding: 16px; border-radius: 16px; margin-bottom: 16px; border: 1px solid #49454f; }
+        .report-item { background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; margin-top: 8px; font-size: 13px; border-left: 4px solid var(--m3-primary); }
+
+        /* 共通ボタン */
+        .btn { border: none; padding: 12px 24px; border-radius: 20px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-primary { background: var(--m3-primary); color: var(--m3-on-primary); }
+        .btn-text { background: none; color: var(--m3-primary); }
+
+        /* ナビバー */
+        nav { position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%); height: 75px; background: var(--surf); border-radius: 38px; display: flex; align-items: center; padding: 0 10px; z-index: 2000; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+        .nav-item { width: 60px; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; }
     </style>
 </head>
 <body>
 
-<div id="boot-loader">
-    <img src="logo.png" class="boot-logo" onerror="this.src='https://placehold.jp/381e72/d0bcff/160x90.png?text=YangTube'">
-    <div class="progress-bar"><div class="progress-fill"></div></div>
-</div>
-
 <header>
-    <img src="logo.png" class="logo" onerror="this.src='https://placehold.jp/381e72/d0bcff/160x90.png?text=Logo'">
+    <img src="logo.png" class="logo" onerror="this.src='https://placehold.jp/381e72/d0bcff/160x90.png?text=YangTube'">
 </header>
 
 <main>
     <span class="material-symbols-rounded mnt-icon">build</span>
-    <div class="mnt-title">ただいまメンテナンス中です</div>
-    <div class="mnt-text">
-        大規模アップデートの準備をしています。<br>
-        GASとFirebaseへの移行、および広告検知システムの<br>
-        構築を行っております。もうしばらくお待ちください。
+    <div style="font-size:22px; font-weight:bold; margin-bottom:10px;">大規模メンテナンス中</div>
+    <div style="font-size:14px; opacity:0.7; line-height:1.6;">
+        現在、YangTubeの脱GitHub・Firebase移行作業を<br>行っています。アップデートまで今しばらくお待ちください。
     </div>
+    <button class="btn btn-text" style="margin-top:20px;" onclick="openFeedback()">
+        <span class="material-symbols-rounded" style="vertical-align:middle; margin-right:8px;">feedback</span>
+        バグ報告・フィードバックを送る
+    </button>
 </main>
 
+<div id="feedback-sheet">
+    <div class="sheet-handle"></div>
+    <h3 style="margin:0 0 16px 0;">フィードバック送信</h3>
+    <textarea id="fb-text" placeholder="バグの報告や、新機能の要望を教えてください..."></textarea>
+    <div style="display:flex; justify-content:flex-end; gap:12px;">
+        <button class="btn btn-text" onclick="closeFeedback()">キャンセル</button>
+        <button class="btn btn-primary" onclick="sendFeedback()">送信する</button>
+    </div>
+</div>
+
+<div id="admin-panel">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+        <h2 style="margin:0; display:flex; align-items:center; gap:12px;">
+            <span class="material-symbols-rounded" style="color:var(--m3-primary)">terminal</span>
+            Dev Console
+        </h2>
+        <button onclick="closeAdmin()" style="background:none; border:none; color:#fff;"><span class="material-symbols-rounded">close</span></button>
+    </div>
+
+    <div class="admin-card">
+        <b>📝 届いたフィードバック</b>
+        <div id="admin-reports-list">
+            <p style="opacity:0.5; font-size:13px;">報告はまだありません</p>
+        </div>
+        <button class="btn btn-text" style="width:100%; margin-top:10px;" onclick="clearReports()">報告をすべて消去</button>
+    </div>
+
+    <div class="admin-card">
+        <b>🚀 メンテナンス操作</b>
+        <div style="display:flex; gap:10px; margin-top:12px;">
+            <button class="btn btn-primary" onclick="alert('Firebase移行後に有効化されます')">メンテナンス解除</button>
+            <button class="btn btn-text" onclick="location.href='https://github.com/xiaomi-ops710/YangTube/edit/main/index.html'">GitHubで編集</button>
+        </div>
+    </div>
+</div>
+
 <nav>
-    <div class="nav-item"><span class="material-symbols-rounded" style="color:var(--m3-primary)">home</span></div>
-    <div class="nav-item"><span class="material-symbols-rounded">search</span></div>
-    <div class="fab"><span class="material-symbols-rounded">construction</span></div>
-    <div class="nav-item"><span class="material-symbols-rounded">subscriptions</span></div>
-    <div class="nav-item"><span class="material-symbols-rounded">settings</span></div>
+    <div class="nav-item" onclick="alert('現在メンテナンス中です')"><span class="material-symbols-rounded" style="color:var(--m3-primary)">home</span></div>
+    <div class="nav-item" onclick="openAdmin()"><span class="material-symbols-rounded">admin_panel_settings</span></div>
+    <div class="nav-item" onclick="openFeedback()"><span class="material-symbols-rounded">chat_bubble</span></div>
 </nav>
 
 <script>
-    window.onload = () => {
-        // 起動アニメーションを1.5秒表示してから消す
-        setTimeout(() => {
-            const loader = document.getElementById('boot-loader');
-            loader.style.opacity = '0';
-            setTimeout(() => loader.remove(), 800);
-        }, 1500);
-    };
+    // URLの admin=dev2633 を確認
+    const urlParams = new URLSearchParams(window.location.search);
+    const isAdmin = urlParams.get('admin') === 'dev2633';
+
+    // フィードバック開閉
+    function openFeedback() { document.getElementById('feedback-sheet').classList.add('open'); }
+    function closeFeedback() { document.getElementById('feedback-sheet').classList.remove('open'); }
+
+    // フィードバック送信（一旦LocalStorageに保存）
+    function sendFeedback() {
+        const text = document.getElementById('fb-text').value;
+        if(!text) return;
+        
+        let reports = JSON.parse(localStorage.getItem('yt_reports') || '[]');
+        reports.push({ text: text, date: new Date().toLocaleString() });
+        localStorage.setItem('yt_reports', JSON.stringify(reports));
+        
+        alert('報告ありがとうございます！開発者へ送信されました。');
+        document.getElementById('fb-text').value = '';
+        closeFeedback();
+    }
+
+    // 開発者パネル開閉
+    function openAdmin() {
+        if(isAdmin) {
+            renderReports();
+            document.getElementById('admin-panel').style.display = 'flex';
+        } else {
+            alert('開発者権限がありません。URLを確認してください。');
+        }
+    }
+    function closeAdmin() { document.getElementById('admin-panel').style.display = 'none'; }
+
+    // 報告内容の表示
+    function renderReports() {
+        const list = document.getElementById('admin-reports-list');
+        const reports = JSON.parse(localStorage.getItem('yt_reports') || '[]');
+        if(reports.length === 0) {
+            list.innerHTML = '<p style="opacity:0.5; font-size:13px;">報告はまだありません</p>';
+            return;
+        }
+        list.innerHTML = reports.map(r => `
+            <div class="report-item">
+                <div style="font-weight:bold;">${r.text}</div>
+                <div style="font-size:11px; opacity:0.6; margin-top:4px;">${r.date}</div>
+            </div>
+        `).reverse().join('');
+    }
+
+    function clearReports() {
+        if(confirm('すべての報告を削除しますか？')) {
+            localStorage.removeItem('yt_reports');
+            renderReports();
+        }
+    }
 </script>
 
 </body>
